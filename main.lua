@@ -3,13 +3,14 @@ blockieFactory = require("blockie")
 local x = 0
 local y = 0
 
-local rootBlockies = {}
 
-table.insert(rootBlockies, blockieFactory.new(0.2,0.6,0.2))
-table.insert(rootBlockies, blockieFactory.new(0.2,0.2,0.6))
+local b = blockieFactory.new(0.2,0.6,0.2)
+b.child = blockieFactory.new(0.2,0.2,0.6)
+b.child.child = blockieFactory.new(0.6,0.6,0.2)
+local rootBlockies = {b}
 
-rootBlockies[2].x = 20
-rootBlockies[2].y = 150
+b.place( 50, 50)
+b.measure()
 
 current = nil
 offset_x = 0
@@ -32,9 +33,9 @@ function love.mousemoved(mx,my)
     x = mx
     y = my
 
+
     if current ~= nil then
-        current.x = mx + offset_x
-        current.y = my + offset_y
+        current.place( mx + offset_x, my + offset_y)
     end
 end
 
@@ -47,7 +48,10 @@ function love.mousepressed(mx, my)
             local v = rootBlockies[i]
             if x >= v.x and x <= v.x + v.width
             and y >= v.y and y <= v.y + v.height then
-                current = table.remove( rootBlockies, i)
+                current = v.pick(mx, my)
+                if current == v then
+                    table.remove( rootBlockies, i)
+                end
                 offset_x = current.x - mx
                 offset_y = current.y - my
                 return nil
@@ -62,3 +66,20 @@ function love.mousereleased()
     current = nil
     end
 end
+
+
+function test (   --funcOpen  
+    param, --func param
+    param2, -- func param
+    param3 ) -- close param
+z -- value
+= -- assign
+2 -- numeral
++ -- add
+3 -- numeral
+return -- ret 
+z -- value
++   -- addition
+150 -- numeral
+
+end -- func end
