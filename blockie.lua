@@ -11,6 +11,19 @@ blockieFactory.renderBlockie = function( blockie )
     end
 end
 
+blockieFactory.dropBlockie = function( blockie, target, mx, my)
+    local result = true
+    if blockie.child then
+        result = blockie.child.drop(target, mx, my)
+    else
+        blockie.child = target
+    end
+    blockie.measure()
+    blockie.place(blockie.x, blockie.y)
+    return result
+end
+
+
 blockieFactory.getBlockie = function( blockie , mx, my )
     local ret = blockie
     if blockie.child 
@@ -53,6 +66,7 @@ blockieFactory.new = function( r, g, b )
     result.pick = function(mx, my) return blockieFactory.getBlockie(result, mx, my) end
     result.measure = function() blockieFactory.measure(result) end
     result.place = function( x, y ) blockieFactory.place( result, x, y) end
+    result.drop = function( target, x, y) return blockieFactory.dropBlockie( result, target, x, y ) end
     result.measure()
     result.place( 100, 100 )
     result.child = nil

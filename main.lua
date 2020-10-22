@@ -61,8 +61,19 @@ function love.mousepressed(mx, my)
 end
 
 function love.mousereleased()
+    local res = false
     if current ~= nil then
-    table.insert( rootBlockies, current )
+        for i = #rootBlockies, 1, -1 do
+            local v = rootBlockies[i]
+            if x >= v.x and x <= v.x + v.width
+            and y >= v.y and y <= v.y + v.height then
+                res = v.drop(current, mx, my)
+                break                
+            end
+        end
+        if not res then 
+            table.insert( rootBlockies, current )
+        end
     current = nil
     end
 end
