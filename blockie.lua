@@ -1,3 +1,5 @@
+local boxFactory = require("box")
+
 local blockieFactory = {}
 
 blockieFactory.renderBlockie = function( blockie )
@@ -9,7 +11,20 @@ blockieFactory.renderBlockie = function( blockie )
     if blockie.child then
         blockie.child.draw()
     end
+
+    blockieFactory.drawSlottie(blockie.left)
+    blockieFactory.drawSlottie(blockie.right)
+
 end
+
+blockieFactory.drawSlottie = function ( slottie )
+    love.graphics.push('all')
+    love.graphics.setColor( 1,1,1,0.5 )
+    love.graphics.translate(slottie.x, slottie.y)
+    love.graphics.rectangle('fill', 0,0, slottie.w, slottie.h)
+    love.graphics.pop()
+end
+
 
 blockieFactory.dropBlockie = function( blockie, target, mx, my)
     local result = true
@@ -38,8 +53,8 @@ blockieFactory.getBlockie = function( blockie , mx, my )
     return ret
 end
 
-blockieFactory.measure = function( blockie )
-    if blockie.child then
+blockieFactory.measure = function( blockie )    
+    if blockie.child then        
         blockie.child.measure()
         blockie.width = blockie.child.width + 14
         blockie.height = blockie.child.height + 14
@@ -52,16 +67,22 @@ end
 blockieFactory.place = function( blockie, x, y )
     blockie.x = x
     blockie.y = y
+    blockie.left.x = blockie.x + 10
+    blockie.left.y = blockie.y + 10
+    blockie.right.x = blockie.x + 30
+    blockie.right.y = blockie.y + 10
     if blockie.child then
         blockie.child.place( x + 7, y + 7)
     end
 end
 
 blockieFactory.new = function( r, g, b )
-    local result = {}
+    local result = boxFactory.new( 100, 100, 100, 100 )
     result.r = r
     result.g = g
     result.b = b    
+    result.left = boxFactory.new(0, 0, 10, 30)
+    result.right = boxFactory.new(0,0,10,30)
     result.draw = function() blockieFactory.renderBlockie(result) end
     result.pick = function(mx, my) return blockieFactory.getBlockie(result, mx, my) end
     result.measure = function() blockieFactory.measure(result) end

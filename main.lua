@@ -1,13 +1,14 @@
 blockieFactory = require("blockie")
+local hl = require("horizontalList")
 
 local x = 0
 local y = 0
 
 
 local b = blockieFactory.new(0.2,0.6,0.2)
-b.child = blockieFactory.new(0.2,0.2,0.6)
-b.child.child = blockieFactory.new(0.6,0.6,0.2)
-local rootBlockies = {b}
+local c = blockieFactory.new(0.2,0.2,0.6)
+b.place(200,200)
+local rootBlockies = {b, c}
 
 b.place( 50, 50)
 b.measure()
@@ -16,16 +17,22 @@ current = nil
 offset_x = 0
 offset_y = 0
 
+local lll = hl.new(10,10,10)
+
 
 function love.draw( ... )
 
-    for i, v in ipairs(rootBlockies) do
-        v.draw()
-    end
-    if current ~= nil then
-        current.draw()
-    end
-    love.graphics.circle('fill', x, y, 4)
+    lll.update()
+    lll.measure()
+    lll.draw()
+
+    -- for i, v in ipairs(rootBlockies) do
+    --     v.draw()
+    -- end
+    -- if current ~= nil then
+    --     current.draw()
+    -- end
+    -- love.graphics.circle('fill', x, y, 4)
 end
 
 
