@@ -63,7 +63,7 @@ end
 
 horizontalListFactory.new = function ( type, min_w, min_h )
     local result = boxFactory.new(50,50,50,50) 
-    result.content = {boxFactory.new(10,10,150,50) ,boxFactory.new(10,10,425,50) ,boxFactory.new(10,10,30,50) }
+    result.content = {} --{boxFactory.new(10,10,150,50) ,boxFactory.new(10,10,425,50) ,boxFactory.new(10,10,30,50) }
     result.slots = {}
     result.update = function () update ( result) end
     result.measure = function () measure ( result ) end
