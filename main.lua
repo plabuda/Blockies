@@ -5,6 +5,9 @@ HEIGHT_DEFAULT = 32
 
 box = {}
 
+font = love.graphics.newFont( "FiraMono-Medium.ttf", 16)
+love.graphics.setFont(font)
+
 local function new_collection ( payload )
     return {payload = payload}
 end
@@ -193,6 +196,7 @@ hor.blocks2.payload = {random_block(), random_block(), random_block(), random_bl
 
 function  love.draw ( ... )
     hor.draw(50,50)
+    love.graphics.print( "Hello world -> --> ---> ", 200, 400 )
 end
 
 function love.keypressed ()
