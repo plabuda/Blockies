@@ -85,7 +85,7 @@ local function random_block()
     local g = love.math.random( )
     local b = love.math.random( )
     local w = 20 + love.math.random( ) * 180
-    local h = 20 + love.math.random( ) * 10
+    local h = 20 + love.math.random( ) * 80
 
     local measure_callback = function ( retval )
         retval.h = h
@@ -93,9 +93,9 @@ local function random_block()
     end
 
     local draw_callback = function ( retval, x, y )
-        love.graphics.setColor(r * 0.5, g * 0.5, b * 0.5)
-        love.graphics.rectangle('line', x + retval.x , y + retval.y , retval.w + retval.m_w, retval.h + retval.m_h)
         love.graphics.setColor(r * 0.7, g * 0.7, b * 0.7)
+      --  love.graphics.rectangle('line', x + retval.x , y + retval.y , retval.w + retval.m_w, retval.h + retval.m_h)
+        love.graphics.setColor(r, g, b)
         love.graphics.rectangle('fill', x + retval.x + retval.m_w / 2, y + retval.y + retval.m_h / 2, retval.w, retval.h)
     end
 
@@ -114,9 +114,60 @@ local function horizontal_block()
             max_h = math.max( max_h, h )
             offset = offset + w
         end --named component
-            
-        retval.h = max_h + MARGIN_DEFAULT  
+        
         retval.w = offset -- + MARGIN_DEFAULT
+
+        max_h = max_h + MARGIN_DEFAULT
+
+        offset = 0
+        local max_h2 = 50
+
+        for i=1,#retval.blocks2.payload do 
+            local block = retval.blocks2.payload[i]
+            block.y = max_h + MARGIN_DEFAULT / 2
+            block.x = offset -- + MARGIN_DEFAULT /2
+            local w, h = block.getSize()
+            max_h2 = math.max( max_h2, h )
+            offset = offset + w
+        end --named component
+            
+        retval.h = max_h + max_h2 + MARGIN_DEFAULT  
+        retval.w = math.max(offset, retval.w)  -- + MARGIN_DEFAULT
+    end
+
+    local draw_callback = function ( retval, x, y )
+        love.graphics.setColor(0.2,0.2,0.2)
+       -- love.graphics.rectangle('line', x + retval.x , y + retval.y , retval.w + retval.m_w, retval.h + retval.m_h)
+        love.graphics.setColor(0.35,0.35,0.35)
+        love.graphics.rectangle('fill', x + retval.x + retval.m_w / 2, y + retval.y + retval.m_h / 2, retval.w, retval.h)
+    end
+
+    local result = box.new( measure_callback, draw_callback)
+    local collection = new_collection(nil)
+    local collection2 = new_collection(nil)
+    result.blocks = collection
+    result.blocks2 = collection2
+    result.collections = {collection, collection2}
+
+    return result
+
+end
+
+local function vertical_block()
+    local measure_callback = function ( retval )
+        local offset = 0
+        local max_w = 50
+        for i=1,#retval.blocks.payload do 
+            local block = retval.blocks.payload[i]
+            block.x = MARGIN_DEFAULT / 2
+            block.y = offset -- + MARGIN_DEFAULT /2
+            local w, h = block.getSize()
+            max_w = math.max( max_w, w )
+            offset = offset + h
+        end --named component
+            
+        retval.w = max_w + MARGIN_DEFAULT  
+        retval.h = offset -- + MARGIN_DEFAULT
     end
 
     local draw_callback = function ( retval, x, y )
@@ -125,7 +176,7 @@ local function horizontal_block()
         love.graphics.setColor(0.35,0.35,0.35)
         love.graphics.rectangle('fill', x + retval.x + retval.m_w / 2, y + retval.y + retval.m_h / 2, retval.w, retval.h)
     end
-
+    
     local result = box.new( measure_callback, draw_callback)
     local collection = new_collection(nil)
     result.blocks = collection
@@ -137,6 +188,7 @@ end
 
 local hor = horizontal_block()
 hor.blocks.payload = {random_block(), random_block(), random_block(), random_block(), random_block() }
+hor.blocks2.payload = {random_block(), random_block(), random_block(), random_block(), random_block() }
 
 
 function  love.draw ( ... )
