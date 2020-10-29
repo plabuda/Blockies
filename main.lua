@@ -16,11 +16,35 @@ local function new_child ( payload )
     return {payload = payload}
 end
 
+local function box_collide( box1,  box2 )
+    local b1 = {
+        left = box1.x_a + box1.m_w / 2,
+        right = box1.x_a + box1.m_w / 2+ box1.w,
+
+        top =  box1.y_a + box1.m_h / 2,
+        bottom = box1.y_a + box1.m_h / 2 + box1.h
+    }
+
+    local b2 = {
+        left = box2.x_a + box2.m_w / 2,
+        right = box2.x_a + box2.m_w / 2 + box2.w,
+
+        top =  box2.y_a + box2.m_h / 2,
+        bottom = box2.y_a + box2.m_h / 2 + box2.h
+    }
+
+    return b1.left < b2.right and
+    b1.right > b2.left and
+    b1.top < b2.bottom and
+    b1.bottom > b2.top
+end
+
+
 local function draw_box( retval, x, y, r, g, b)
     love.graphics.setColor(r * 0.7, g * 0.7, b * 0.7)
-    love.graphics.rectangle('line', x + retval.x , y + retval.y , retval.w + retval.m_w, retval.h + retval.m_h)
+    --love.graphics.rectangle('line', retval.x_a , retval.y_a , retval.w + retval.m_w, retval.h + retval.m_h)
     love.graphics.setColor(r, g, b)
-    love.graphics.rectangle('fill', x + retval.x + retval.m_w / 2, y + retval.y + retval.m_h / 2, retval.w, retval.h)
+    love.graphics.rectangle('fill', retval.x_a + retval.m_w/2 , retval.y_a + retval.m_h / 2, retval.w, retval.h)
 end
 
 
@@ -66,9 +90,13 @@ box.new = function( measure_callback, draw_callback )
     end
 
     retval.draw = function ( x, y )
+        retval.x_a = x + retval.x -- calculate absolute position 
+        retval.y_a = y + retval.y
+        
         draw_callback ( retval, x, y )
-        local x2 = retval.x + retval.m_w /2 + x
-        local y2 = retval.y + retval.m_h /2 + y
+
+        local x2 = retval.x_a + retval.m_w /2
+        local y2 = retval.y_a + retval.m_h /2 
 
         -- iterate over and measure all singular children
         for i=1,#retval.children do
@@ -92,15 +120,10 @@ box.new = function( measure_callback, draw_callback )
     return retval
 end
 
-local function random_block()
-    local r = love.math.random( )
-    local g = love.math.random( )
-    local b = love.math.random( )
-    local w = 20 + love.math.random( ) * 180
-    local h = 20 + love.math.random( ) * 80
-
+local function simple_block(w,h,r,g,b)
     local measure_callback = function ( retval )
         retval.w = w
+        retval.h = h 
     end
 
     local draw_callback = function ( retval, x, y )
@@ -108,6 +131,16 @@ local function random_block()
     end
 
     return box.new( measure_callback, draw_callback )
+end
+
+local function random_block()
+    local r = love.math.random( )
+    local g = love.math.random( )
+    local b = love.math.random( )
+    local w = 20 + love.math.random( ) * 180
+        local h = 20 
+
+    return simple_block(w, h, r, g, b)
 end
 
 local function horizontal_block()
@@ -206,15 +239,31 @@ end
 end
 
 local hor = horizontal_block()
-hor.blocks.payload = {random_block(), slot(), random_block(), slot(), random_block(), slot(), random_block(), slot(), random_block() }
+local target = random_block()
+hor.blocks.payload = {random_block(), slot(), random_block(), slot(), random_block(), slot(), target, slot(), random_block() }
 hor.blocks2.payload = {random_block(), random_block(), random_block(), random_block(), random_block() }
 
+local cursor = simple_block(40,40,1,1,1)
+
+local mx = 0
+local my = 0
 
 function  love.draw ( ... )
     hor.draw(50,50)
-    love.graphics.print( "Hello world -> --> ---> ", 200, 400 )
+    cursor.draw(mx - 20, my - 20)
+    if box_collide(target, cursor) then
+    love.graphics.print( "Boxes overlap -> True", 200, 400 )
+    else
+        love.graphics.print( "Boxes overlap -> False", 200, 400 )
+    end
+
 end
 
 function love.keypressed ()
     hor.measure()
+end
+
+function love.mousemoved( x, y, dx, dy, istouch )
+    mx = x
+    my = y
 end
