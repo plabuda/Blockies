@@ -16,6 +16,13 @@ local function new_child ( payload )
     return {payload = payload}
 end
 
+local function draw_box( retval, x, y, r, g, b)
+    love.graphics.setColor(r * 0.7, g * 0.7, b * 0.7)
+    love.graphics.rectangle('line', x + retval.x , y + retval.y , retval.w + retval.m_w, retval.h + retval.m_h)
+    love.graphics.setColor(r, g, b)
+    love.graphics.rectangle('fill', x + retval.x + retval.m_w / 2, y + retval.y + retval.m_h / 2, retval.w, retval.h)
+end
+
 
 box.new = function( measure_callback, draw_callback )
     local retval =
@@ -26,6 +33,8 @@ box.new = function( measure_callback, draw_callback )
         m_h = MARGIN_DEFAULT,
         x = 0,
         y = 0,
+        x_a = 0, -- absolute transform, updated on move()
+        y_a = 0,
         collections = {},
         children = {}
     }
@@ -91,15 +100,11 @@ local function random_block()
     local h = 20 + love.math.random( ) * 80
 
     local measure_callback = function ( retval )
-        retval.h = h
         retval.w = w
     end
 
     local draw_callback = function ( retval, x, y )
-        love.graphics.setColor(r * 0.7, g * 0.7, b * 0.7)
-      --  love.graphics.rectangle('line', x + retval.x , y + retval.y , retval.w + retval.m_w, retval.h + retval.m_h)
-        love.graphics.setColor(r, g, b)
-        love.graphics.rectangle('fill', x + retval.x + retval.m_w / 2, y + retval.y + retval.m_h / 2, retval.w, retval.h)
+        draw_box(retval, x, y, r, g, b)
     end
 
     return box.new( measure_callback, draw_callback )
@@ -139,10 +144,7 @@ local function horizontal_block()
     end
 
     local draw_callback = function ( retval, x, y )
-        love.graphics.setColor(0.2,0.2,0.2)
-       -- love.graphics.rectangle('line', x + retval.x , y + retval.y , retval.w + retval.m_w, retval.h + retval.m_h)
-        love.graphics.setColor(0.35,0.35,0.35)
-        love.graphics.rectangle('fill', x + retval.x + retval.m_w / 2, y + retval.y + retval.m_h / 2, retval.w, retval.h)
+        draw_box(retval,x, y, 0.6, 0.6, 0.6)
     end
 
     local result = box.new( measure_callback, draw_callback)
@@ -186,11 +188,25 @@ local function vertical_block()
     result.collections = {collection}
 
     return result
+end
 
+local function slot()
+    local measure_callback = function (retval)
+        retval.w = 2 * MARGIN_DEFAULT
+        retval.m_w = -2 * MARGIN_DEFAULT
+        retval.h = HEIGHT_DEFAULT + MARGIN_DEFAULT * 1.5
+        retval.m_h = -0.5 * MARGIN_DEFAULT
+end
+
+    local draw_callback = function ( retval, x, y )
+        draw_box(retval, x, y, 1, 1, 1)
+    end
+
+    return box.new(measure_callback, draw_callback)
 end
 
 local hor = horizontal_block()
-hor.blocks.payload = {random_block(), random_block(), random_block(), random_block(), random_block() }
+hor.blocks.payload = {random_block(), slot(), random_block(), slot(), random_block(), slot(), random_block(), slot(), random_block() }
 hor.blocks2.payload = {random_block(), random_block(), random_block(), random_block(), random_block() }
 
 
