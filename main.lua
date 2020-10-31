@@ -308,7 +308,9 @@ function draw_cursor()
 end
 
 function  love.draw ( ... )
+
     hor.measure()
+
     hor.draw(50,50)
     draw_cursor()   
 
