@@ -40,9 +40,9 @@ local function box_collide( box1,  box2 )
 end
 
 
-local function draw_box( retval, x, y, r, g, b)
+local function draw_box( retval, r, g, b)
     love.graphics.setColor(r * 0.7, g * 0.7, b * 0.7)
-    --love.graphics.rectangle('line', retval.x_a , retval.y_a , retval.w + retval.m_w, retval.h + retval.m_h)
+    love.graphics.rectangle('line', retval.x_a , retval.y_a , retval.w + retval.m_w, retval.h + retval.m_h)
     love.graphics.setColor(r, g, b)
     love.graphics.rectangle('fill', retval.x_a + retval.m_w/2 , retval.y_a + retval.m_h / 2, retval.w, retval.h)
 end
@@ -117,11 +117,32 @@ box.new = function( measure_callback, draw_callback )
         measure_callback ( retval )
     end
 
-    retval.draw = function ( x, y )
+    retval.draw = function ()
+
+        draw_callback ( retval )
+        
+        for i=1,#retval.children do
+            if retval.children[i].payload then
+                retval.children[i].payload.draw()
+            end
+        end  
+        
+        for j=1,#retval.collections do
+            if retval.collections[j].payload then
+                local collection = retval.collections[j].payload
+                for k=1,#collection do
+                    collection[k].draw()
+                end
+            end
+        end
+
+    end
+
+    retval.move = function ( x, y )
         retval.x_a = x + retval.x -- calculate absolute position 
         retval.y_a = y + retval.y
         
-        draw_callback ( retval, x, y )
+        --draw_callback ( retval, x, y ) -- don't actually draw
 
         local x2 = retval.x_a + retval.m_w /2
         local y2 = retval.y_a + retval.m_h /2 
@@ -129,7 +150,7 @@ box.new = function( measure_callback, draw_callback )
         -- iterate over and measure all singular children
         for i=1,#retval.children do
             if retval.children[i].payload then
-                retval.children[i].payload.draw(x2, y2)
+                retval.children[i].payload.move(x2, y2)
             end
         end  
         
@@ -138,7 +159,7 @@ box.new = function( measure_callback, draw_callback )
             if retval.collections[j].payload then
                 local collection = retval.collections[j].payload
                 for k=1,#collection do
-                    collection[k].draw(x2, y2)
+                    collection[k].move(x2, y2)
                 end
             end
         end
@@ -154,8 +175,8 @@ local function simple_block(w,h,r,g,b)
         retval.h = h 
     end
 
-    local draw_callback = function ( retval, x, y )
-        draw_box(retval, x, y, r, g, b)
+    local draw_callback = function ( retval )
+        draw_box(retval, r, g, b)
     end
 
     return box.new( measure_callback, draw_callback )
@@ -204,8 +225,8 @@ local function horizontal_block()
         retval.w = math.max(offset, retval.w)  -- + MARGIN_DEFAULT
     end
 
-    local draw_callback = function ( retval, x, y )
-        draw_box(retval,x, y, 0.6, 0.6, 0.6)
+    local draw_callback = function ( retval )
+        draw_box(retval, 0.6, 0.6, 0.6)
     end
 
     local result = box.new( measure_callback, draw_callback)
@@ -236,7 +257,7 @@ local function vertical_block()
         retval.h = offset -- + MARGIN_DEFAULT
     end
 
-    local draw_callback = function ( retval, x, y )
+    local draw_callback = function ( retval )
         love.graphics.setColor(0.2,0.2,0.2)
         love.graphics.rectangle('line', x + retval.x , y + retval.y , retval.w + retval.m_w, retval.h + retval.m_h)
         love.graphics.setColor(0.35,0.35,0.35)
@@ -266,8 +287,8 @@ local function slot()
         end
 end
 
-    local draw_callback = function ( retval, x, y )
-        draw_box(retval, x, y, 1, 1, 1)
+    local draw_callback = function ( retval )
+        draw_box(retval, 1, 1, 1)
     end
 
     local value = box.new(measure_callback, draw_callback)
@@ -290,7 +311,8 @@ local collided_slot = nil
 
 function draw_cursor()
     -- draw cursor to update hitboxes
-    cursor.draw(mx - (cursor.w + cursor.m_w) /2, my - (cursor.h + cursor.m_h) /2 )
+    cursor.move(mx - (cursor.w + cursor.m_w) /2, my - (cursor.h + cursor.m_h) /2 )
+    cursor.draw()
     local keep_old = collided_slot ~= nil and box_collide(cursor, collided_slot)
     if not keep_old then -- look for new collision
 
@@ -307,11 +329,13 @@ function draw_cursor()
 
 end
 
+
 function  love.draw ( ... )
 
     hor.measure()
+    hor.move(50,50)
 
-    hor.draw(50,50)
+    hor.draw()
     draw_cursor()   
 
 
