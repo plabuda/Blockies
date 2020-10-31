@@ -63,6 +63,34 @@ box.new = function( measure_callback, draw_callback )
         children = {}
     }
 
+    retval.clear_slots = function ()
+        for i=1,#retval.children do
+            if retval.children[i].payload then
+                if retval.children[i].payload.is_slot == true then
+                    retval.children[i].payload = nil
+                else
+                    retval.children[i].payload.clear_slots()
+                end
+            end
+        end
+
+        -- iterate over and measure all collections
+        for j=1,#retval.collections do
+            if retval.collections[j].payload then
+                local collection = retval.collections[j].payload
+                local k = 1
+                while k <= #collection do
+                    if collection[k].is_slot then
+                        table.remove( collection , k)
+                    else
+                        collection[k].clear_slots()
+                        k = k + 1
+                    end
+                end
+            end    
+        end
+    end
+
     retval.collide = function ( other )        
         if box_collide(retval, other) then
             if retval.is_slot == true then
@@ -343,10 +371,12 @@ function  love.draw ( ... )
         love.graphics.print( "Boxes overlap -> True " .. tostring(collided_slot.x_a) .. " | " .. tostring(collided_slot.y_a), 200, 400 )
         else
             love.graphics.print( "Boxes overlap -> False", 200, 400 )
-        end
-    
+        end  
 
+end
 
+function love.keypressed()
+    hor.clear_slots()
 end
 
 function love.mousemoved( x, y, dx, dy, istouch )
