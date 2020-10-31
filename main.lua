@@ -91,6 +91,32 @@ box.new = function( measure_callback, draw_callback )
         end
     end
 
+    retval.add_slots = function ( type )
+        -- can there even be a nil collection? Maybe for else blocks in if? Still, in that case the block should control it, not slots
+        for i=1,#retval.children do
+            if retval.children[i].payload then
+                    retval.children[i].payload.add_slots(type)              
+            else
+                retval.children[i].payload = slot() -- replace with a proper slot type
+
+            end
+        end
+
+        -- iterate over and measure all collections
+        for j=1,#retval.collections do
+            if retval.collections[j].payload then
+                local collection = retval.collections[j].payload
+                local result = {slot()}
+                for k=1,#collection do
+                    collection[k].add_slots(type)
+                    table.insert( result, collection[k])
+                    table.insert( result, slot() )
+                end
+                retval.collections[j].payload = result
+            end    
+        end
+    end
+
     retval.collide = function ( other )        
         if box_collide(retval, other) then
             if retval.is_slot == true then
@@ -263,6 +289,7 @@ local function horizontal_block()
     result.blocks = collection
     result.blocks2 = collection2
     result.collections = {collection, collection2}
+   -- result.children = {new_child(nil)}
 
     return result
 
@@ -296,11 +323,12 @@ local function vertical_block()
     local collection = new_collection(nil)
     result.blocks = collection
     result.collections = {collection}
+    result.children = {new_child(nil)}
 
     return result
 end
 
-local function slot()
+function slot()
     local measure_callback = function (retval)
         if retval.candidate ~= nil then
             retval.w = retval.candidate.w
@@ -327,7 +355,7 @@ end
 local hor = horizontal_block()
 local target = random_block()
 hor.blocks.payload = {random_block(), slot(), random_block(), slot(), random_block(), slot(), target, slot(), random_block() }
-hor.blocks2.payload = {random_block(), random_block(), random_block(), random_block(), random_block() }
+hor.blocks2.payload = {}
 
 local cursor = simple_block(80,40,0.6,0.6,0)
 cursor.measure()
@@ -375,8 +403,16 @@ function  love.draw ( ... )
 
 end
 
+local has_slots = true
+
 function love.keypressed()
-    hor.clear_slots()
+    if has_slots == true then
+        hor.clear_slots()
+        has_slots = false
+    else
+        hor.add_slots( "none type" )
+        has_slots = true
+    end
 end
 
 function love.mousemoved( x, y, dx, dy, istouch )
