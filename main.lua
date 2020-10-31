@@ -19,18 +19,18 @@ end
 local function box_collide( box1,  box2 )
     local b1 = {
         left = box1.x_a + box1.m_w / 2,
-        right = box1.x_a + box1.m_w / 2+ box1.w,
+        right = box1.x_a + box1.w + box1.m_w / 2,
 
         top =  box1.y_a + box1.m_h / 2,
-        bottom = box1.y_a + box1.m_h / 2 + box1.h
+        bottom = box1.y_a + box1.h + box1.m_h / 2 
     }
 
     local b2 = {
         left = box2.x_a + box2.m_w / 2,
-        right = box2.x_a + box2.m_w / 2 + box2.w,
+        right = box2.x_a + box2.w + box2.m_w / 2,
 
         top =  box2.y_a + box2.m_h / 2,
-        bottom = box2.y_a + box2.m_h / 2 + box2.h
+        bottom = box2.y_a + box2.h + box2.m_h / 2
     }
 
     return b1.left < b2.right and
@@ -253,10 +253,17 @@ end
 
 local function slot()
     local measure_callback = function (retval)
-        retval.w = 2 * MARGIN_DEFAULT
-        retval.m_w = -2 * MARGIN_DEFAULT
-        retval.h = HEIGHT_DEFAULT + MARGIN_DEFAULT * 1.5
-        retval.m_h = -0.5 * MARGIN_DEFAULT
+        if retval.candidate ~= nil then
+            retval.w = retval.candidate.w
+           -- retval.m_w = retval.candidate.m_w
+            retval.h = retval.candidate.h
+            --retval.m_h = retval.candidate.m_h
+        else
+            retval.w = 2 * MARGIN_DEFAULT
+            retval.m_w = 0--//-2 * MARGIN_DEFAULT
+            retval.h = HEIGHT_DEFAULT + MARGIN_DEFAULT * 1.5
+            retval.m_h = 0-- -0.5 * MARGIN_DEFAULT
+        end
 end
 
     local draw_callback = function ( retval, x, y )
@@ -273,25 +280,47 @@ local target = random_block()
 hor.blocks.payload = {random_block(), slot(), random_block(), slot(), random_block(), slot(), target, slot(), random_block() }
 hor.blocks2.payload = {random_block(), random_block(), random_block(), random_block(), random_block() }
 
-local cursor = simple_block(40,40,0.6,0.6,0)
+local cursor = simple_block(80,40,0.6,0.6,0)
+cursor.measure()
 
 local mx = 0
 local my = 0
 
-function  love.draw ( ... )
-    hor.draw(50,50)
-    cursor.draw(mx - 20, my - 20)
-    local result = hor.collide(cursor)
-    if result ~= nil then
-    love.graphics.print( "Boxes overlap -> True " .. tostring(result.x_a) .. " | " .. tostring(result.y_a), 200, 400 )
-    else
-        love.graphics.print( "Boxes overlap -> False", 200, 400 )
-    end
+local collided_slot = nil
+
+function draw_cursor()
+    -- draw cursor to update hitboxes
+    cursor.draw(mx - (cursor.w + cursor.m_w) /2, my - (cursor.h + cursor.m_h) /2 )
+    local keep_old = collided_slot ~= nil and box_collide(cursor, collided_slot)
+    if not keep_old then -- look for new collision
+
+        -- notify collided slot about not colliding anymore here
+        if collided_slot ~= nil then collided_slot.candidate = nil end
+
+        collided_slot = hor.collide(cursor)
+        if collided_slot ~= nil then
+            collided_slot.candidate = cursor
+            -- notify new slot about coliding here
+        end
+        
+    end   
 
 end
 
-function love.keypressed ()
+function  love.draw ( ... )
     hor.measure()
+    hor.draw(50,50)
+    draw_cursor()   
+
+
+    if collided_slot ~= nil then
+        love.graphics.print( "Boxes overlap -> True " .. tostring(collided_slot.x_a) .. " | " .. tostring(collided_slot.y_a), 200, 400 )
+        else
+            love.graphics.print( "Boxes overlap -> False", 200, 400 )
+        end
+    
+
+
 end
 
 function love.mousemoved( x, y, dx, dy, istouch )
