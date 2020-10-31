@@ -63,6 +63,34 @@ box.new = function( measure_callback, draw_callback )
         children = {}
     }
 
+    retval.collide = function ( other )        
+        if box_collide(retval, other) then
+            if retval.is_slot == true then
+                return retval
+            end
+            -- it we aren't the slot, iterate over children
+            -- iterate over and measure all singular children
+            for i=1,#retval.children do
+                if retval.children[i].payload then
+                    local candidate = retval.children[i].payload.collide( other )
+                    if candidate ~= nil then return candidate end
+                end
+            end
+
+            -- iterate over and measure all collections
+            for j=1,#retval.collections do
+                if retval.collections[j].payload then
+                    local collection = retval.collections[j].payload
+                    for k=1,#collection do
+                        local candidate = collection[k].collide( other )
+                        if candidate ~= nil then return candidate end
+                    end
+                end
+            end
+        end
+        return nil
+    end
+
     retval.getSize = function ()        
         return retval.w + retval.m_w, retval.h + retval.m_h
     end
@@ -235,7 +263,9 @@ end
         draw_box(retval, x, y, 1, 1, 1)
     end
 
-    return box.new(measure_callback, draw_callback)
+    local value = box.new(measure_callback, draw_callback)
+    value.is_slot = true
+    return value
 end
 
 local hor = horizontal_block()
@@ -243,7 +273,7 @@ local target = random_block()
 hor.blocks.payload = {random_block(), slot(), random_block(), slot(), random_block(), slot(), target, slot(), random_block() }
 hor.blocks2.payload = {random_block(), random_block(), random_block(), random_block(), random_block() }
 
-local cursor = simple_block(40,40,1,1,1)
+local cursor = simple_block(40,40,0.6,0.6,0)
 
 local mx = 0
 local my = 0
@@ -251,8 +281,9 @@ local my = 0
 function  love.draw ( ... )
     hor.draw(50,50)
     cursor.draw(mx - 20, my - 20)
-    if box_collide(target, cursor) then
-    love.graphics.print( "Boxes overlap -> True", 200, 400 )
+    local result = hor.collide(cursor)
+    if result ~= nil then
+    love.graphics.print( "Boxes overlap -> True " .. tostring(result.x_a) .. " | " .. tostring(result.y_a), 200, 400 )
     else
         love.graphics.print( "Boxes overlap -> False", 200, 400 )
     end
