@@ -77,13 +77,12 @@ box.new = function( measure_callback, draw_callback )
         -- iterate over and measure all collections
         for j=1,#retval.collections do
             if retval.collections[j].payload then
-                local collection = retval.collections[j].payload
                 local k = 1
-                while k <= #collection do
-                    if collection[k].is_slot then
-                        table.remove( collection , k)
+                while k <= #retval.collections[j].payload do
+                    if retval.collections[j].payload[k].is_slot then
+                        table.remove( retval.collections[j].payload , k)                        
                     else
-                        collection[k].clear_slots()
+                        retval.collections[j].payload[k].clear_slots()
                         k = k + 1
                     end
                 end
@@ -105,12 +104,14 @@ box.new = function( measure_callback, draw_callback )
         -- iterate over and measure all collections
         for j=1,#retval.collections do
             if retval.collections[j].payload then
-                local collection = retval.collections[j].payload
+                local collection = retval.collections[j].payload                
                 local result = {slot()}
                 for k=1,#collection do
-                    collection[k].add_slots(type)
-                    table.insert( result, collection[k])
-                    table.insert( result, slot() )
+                    if collection[k].is_slot ~= true then
+                        collection[k].add_slots(type)
+                        table.insert( result, collection[k])
+                        table.insert( result, slot() )
+                    end
                 end
                 retval.collections[j].payload = result
             end    
@@ -143,6 +144,43 @@ box.new = function( measure_callback, draw_callback )
             end
         end
         return nil
+    end
+
+    retval.pick = function ( other )        -- TODO roll pick and collide together
+        if retval.is_slot ~= true and box_collide(retval, other) then           
+
+            for i=1,#retval.children do
+                if retval.children[i].payload then
+                    local candidate = retval.children[i].payload.pick( other )
+                    if candidate ~= nil then
+                        if candidate == retval.children[i].payload then -- if its a direct descendant, clear it from the slot
+                            retval.children[i].payload = nil
+                        end
+                        return candidate 
+                    end -- if found a candidate, return it
+                end
+            end
+
+            -- iterate over and measure all collections
+            for j=1,#retval.collections do
+                if retval.collections[j].payload then
+                    local collection = retval.collections[j].payload
+                    for k=1,#collection do
+                        local candidate = collection[k].pick( other )
+                        if candidate ~= nil then
+                            if candidate == collection[k] then -- if it's a direct descendant, remove it from collection
+                                table.remove( collection, k ) 
+                            end
+                            return candidate 
+                        end
+                    end
+                end
+            end
+
+            return retval
+        else
+            return nil
+        end
     end
 
     retval.getSize = function ()        
@@ -240,7 +278,7 @@ local function random_block()
     local r = love.math.random( )
     local g = love.math.random( )
     local b = love.math.random( )
-    local w = 20 + love.math.random( ) * 180
+    local w = 20 + love.math.random( ) * 80
         local h = 20 
 
     return simple_block(w, h, r, g, b)
@@ -284,8 +322,8 @@ local function horizontal_block()
     end
 
     local result = box.new( measure_callback, draw_callback)
-    local collection = new_collection(nil)
-    local collection2 = new_collection(nil)
+    local collection = new_collection({})
+    local collection2 = new_collection({})
     result.blocks = collection
     result.blocks2 = collection2
     result.collections = {collection, collection2}
@@ -352,12 +390,17 @@ end
     return value
 end
 
+
+
+
 local hor = horizontal_block()
-local target = random_block()
-hor.blocks.payload = {random_block(), slot(), random_block(), slot(), random_block(), slot(), target, slot(), random_block() }
+hor.blocks.payload = {random_block(), random_block(), random_block(), random_block() }
 hor.blocks2.payload = {}
 
-local cursor = simple_block(80,40,0.6,0.6,0)
+local blocks = {horizontal_block(), random_block(), random_block(), hor, random_block(), horizontal_block()}
+--blocks = {random_block(),random_block(),random_block(),random_block(),random_block(),random_block(),random_block()}
+
+local cursor = simple_block(16,16,0.6,0.6,0)
 cursor.measure()
 
 local mx = 0
@@ -365,34 +408,50 @@ local my = 0
 
 local collided_slot = nil
 
-function draw_cursor()
+
+
+local held_item = nil -- simple_block(60,60,1,1,1)
+
+function move_cursor()
     -- draw cursor to update hitboxes
     cursor.move(mx - (cursor.w + cursor.m_w) /2, my - (cursor.h + cursor.m_h) /2 )
-    cursor.draw()
+    if held_item then
+        held_item.move(mx - (cursor.w + cursor.m_w) /2, my - (cursor.h + cursor.m_h) /2 )
+    end
+
     local keep_old = collided_slot ~= nil and box_collide(cursor, collided_slot)
     if not keep_old then -- look for new collision
 
         -- notify collided slot about not colliding anymore here
         if collided_slot ~= nil then collided_slot.candidate = nil end
 
-        collided_slot = hor.collide(cursor)
-        if collided_slot ~= nil then
-            collided_slot.candidate = cursor
-            -- notify new slot about coliding here
+        for i=1, #blocks do
+            collided_slot = blocks[i].collide(cursor)
+            if collided_slot ~= nil then
+                collided_slot.candidate = held_item
+                return
+                -- notify new slot about coliding here
+            end
         end
         
     end   
 
 end
 
+for i=1,#blocks do
+    blocks[i].measure()
+    blocks[i].move(love.math.random( ) * 250 ,love.math.random( ) * 250)
+end
+
 
 function  love.draw ( ... )
 
-    hor.measure()
-    hor.move(50,50)
-
-    hor.draw()
-    draw_cursor()   
+    move_cursor()   
+    for i=1,#blocks do
+        blocks[i].draw()
+    end    
+    if held_item then held_item.draw() end
+    cursor.draw()
 
 
     if collided_slot ~= nil then
@@ -413,9 +472,59 @@ function love.keypressed()
         hor.add_slots( "none type" )
         has_slots = true
     end
+
+    hor.measure()
+    hor.move(hor.x_a, hor.y_a)
 end
 
 function love.mousemoved( x, y, dx, dy, istouch )
     mx = x
     my = y
+end
+
+function love.mousepressed( x, y, button, istouch, presses )
+
+    if held_item == nil then
+        local result = nil
+
+        for i=1,#blocks do
+            result = blocks[i].pick(cursor)
+            if result ~= nil then                
+                if result == blocks[i] then
+                    table.remove( blocks, i )
+                end
+                break
+            end
+        end
+
+        if result ~= nil then
+            held_item = result
+            held_item.x = held_item.x_a - cursor.x_a
+            held_item.y = held_item.y_a - cursor.y_a
+
+            for j=1,#blocks do
+                blocks[j].add_slots( "none type" )
+                blocks[j].measure()
+                blocks[j].move(blocks[j].x_a, blocks[j].y_a)
+            end
+        end
+    end
+end
+
+function love.mousereleased( x, y, button )
+    if held_item ~= nil then
+        held_item.x = 0
+        held_item.y = 0
+
+        table.insert( blocks, held_item )
+        held_item = nil        
+    end
+
+    for j=1,#blocks do
+        blocks[j].clear_slots()
+        blocks[j].measure()
+        blocks[j].move(blocks[j].x_a, blocks[j].y_a)
+    end
+
+
 end
