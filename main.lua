@@ -42,9 +42,16 @@ end
 
 local function draw_box( retval, r, g, b)
     love.graphics.setColor(r * 0.7, g * 0.7, b * 0.7)
-    love.graphics.rectangle('line', retval.x_a , retval.y_a , retval.w + retval.m_w, retval.h + retval.m_h)
+   -- love.graphics.rectangle('line', retval.x_a , retval.y_a , retval.w + retval.m_w, retval.h + retval.m_h)
+   
+   love.graphics.setColor(1, 1, 1)
+   love.graphics.rectangle('fill', retval.x_a + retval.m_w/2 , retval.y_a + retval.m_h / 2, retval.w, retval.h)
+   
+   love.graphics.setColor(0, 0, 0)
+   love.graphics.rectangle('fill', retval.x_a + retval.m_w/2 + 1 , retval.y_a + retval.m_h / 2 + 1, retval.w - 2, retval.h - 2)
+
     love.graphics.setColor(r, g, b)
-    love.graphics.rectangle('fill', retval.x_a + retval.m_w/2 , retval.y_a + retval.m_h / 2, retval.w, retval.h)
+    love.graphics.rectangle('fill', retval.x_a + retval.m_w/2 + 2 , retval.y_a + retval.m_h / 2 + 2, retval.w - 4, retval.h - 4)
 end
 
 
@@ -95,8 +102,8 @@ box.new = function( measure_callback, draw_callback )
         for i=1,#retval.children do
             if retval.children[i].payload then
                     retval.children[i].payload.add_slots(type)              
-            else
-                retval.children[i].payload = slot() -- replace with a proper slot type
+            else                
+                retval.children[i].payload = slot( function (other) retval.children[i].payload = other end ) -- replace with a proper slot type
 
             end
         end
@@ -105,12 +112,12 @@ box.new = function( measure_callback, draw_callback )
         for j=1,#retval.collections do
             if retval.collections[j].payload then
                 local collection = retval.collections[j].payload                
-                local result = {slot()}
+                local result = {slot( function (other) table.insert( retval.collections[j].payload, 1, other) end )}
                 for k=1,#collection do
                     if collection[k].is_slot ~= true then
                         collection[k].add_slots(type)
                         table.insert( result, collection[k])
-                        table.insert( result, slot() )
+                        table.insert( result, slot( function (other) table.insert( retval.collections[j].payload, k * 2 + 1, other) end ) )
                     end
                 end
                 retval.collections[j].payload = result
@@ -366,7 +373,7 @@ local function vertical_block()
     return result
 end
 
-function slot()
+function slot( drop_callback )
     local measure_callback = function (retval)
         if retval.candidate ~= nil then
             retval.w = retval.candidate.w
@@ -387,6 +394,7 @@ end
 
     local value = box.new(measure_callback, draw_callback)
     value.is_slot = true
+    value.drop_callback = drop_callback
     return value
 end
 
@@ -454,28 +462,28 @@ function  love.draw ( ... )
     cursor.draw()
 
 
-    if collided_slot ~= nil then
-        love.graphics.print( "Boxes overlap -> True " .. tostring(collided_slot.x_a) .. " | " .. tostring(collided_slot.y_a), 200, 400 )
-        else
-            love.graphics.print( "Boxes overlap -> False", 200, 400 )
-        end  
+    -- if collided_slot ~= nil then
+    --     love.graphics.print( "Boxes overlap -> True " .. tostring(collided_slot.x_a) .. " | " .. tostring(collided_slot.y_a), 200, 400 )
+    --     else
+    --         love.graphics.print( "Boxes overlap -> False", 200, 400 )
+    --     end  
 
 end
 
 local has_slots = true
 
-function love.keypressed()
-    if has_slots == true then
-        hor.clear_slots()
-        has_slots = false
-    else
-        hor.add_slots( "none type" )
-        has_slots = true
-    end
+-- function love.keypressed()
+--     if has_slots == true then
+--         hor.clear_slots()
+--         has_slots = false
+--     else
+--         hor.add_slots( "none type" )
+--         has_slots = true
+--     end
 
-    hor.measure()
-    hor.move(hor.x_a, hor.y_a)
-end
+--     hor.measure()
+--     hor.move(hor.x_a, hor.y_a)
+-- end
 
 function love.mousemoved( x, y, dx, dy, istouch )
     mx = x
@@ -516,7 +524,11 @@ function love.mousereleased( x, y, button )
         held_item.x = 0
         held_item.y = 0
 
-        table.insert( blocks, held_item )
+        if collided_slot then 
+            collided_slot.drop_callback(held_item)
+        else
+            table.insert( blocks, held_item )
+        end
         held_item = nil        
     end
 
