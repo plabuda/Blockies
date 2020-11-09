@@ -7,7 +7,6 @@ w:add_block(Block:new(32,32,256,96))
 
 local r = Block:new(64,64,64,64)
 r:set_color(0.6,0.2,0.2)
---r.offset = {x = 0, y = 0}
 
 local g = Block:new(64,64,64,264)
 g:set_color(0.2,0.6,0.2)
@@ -20,7 +19,9 @@ b.offset = {x = -32, y = 32}
 r.children = { { payload = g } }
 g.children = { { payload = b } }
 
-c.collider.children = { {payload = r} }  
+w:add_block(r)  
+
+r:move( 64, 64 )
 
 function love.draw()
 
