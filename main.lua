@@ -2,53 +2,28 @@ local Workspace = require("workspace_oop")
 local Block = require("block_oop")
 local w = Workspace:new()
 local c = w:get_cursor()
-local b = Block:new(64,64,64,64)
-b:set_color(0.6,0.5,0.3)
+
 w:add_block(Block:new(32,32,256,96))
-w:add_block(b)
 
--- -- unit test for children / payload iterator
--- b.children = {
---     { payload = nil},
---     { payload = 'a'},    
---     { payload = nil},    
---     { payload = 'b'},    
---     { payload = 'c'},    
---     { payload = nil},    
---     { payload = nil},
---     { payload = 'd'},
---     { payload = nil}
--- }
+local r = Block:new(64,64,64,64)
+r:set_color(0.6,0.2,0.2)
+--r.offset = {x = 0, y = 0}
 
--- -- unit test for collections
--- b.collections = {
---     { payload = nil},
---     { payload = { 'a', 'b', 'c', 'e' }},
---     { payload = nil},
---     { payload = {'zz','hhh','kkkk'}},
---     { payload = nil},
---     { payload = nil},
---     { payload = nil}
--- }
+local g = Block:new(64,64,64,264)
+g:set_color(0.2,0.6,0.2)
+g.offset = {x = 32, y = 32}
 
-local text = ''
+local b = Block:new(64,64,64,164)
+b:set_color(0.2,0.2,0.6)
+b.offset = {x = -32, y = 32}
 
-for i in b:iterator_children() do
-    text = text .. ' ' .. i
-end
+r.children = { { payload = g } }
+g.children = { { payload = b } }
 
-local text2 = ''
-
-for i in b:iterator_collections() do
-    for _,j in ipairs(i) do
-        text2 = text2 .. ' ' .. j
-    end
-end
+c.collider.children = { {payload = r} }  
 
 function love.draw()
 
-    love.graphics.print(text, 0,0)
-    love.graphics.print(text2, 0,32)
     w:draw()
 
 end

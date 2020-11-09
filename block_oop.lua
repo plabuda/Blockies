@@ -32,7 +32,7 @@ end
 function Block:iterator_payload( collection )
     local i = 1
     local iter = function ()
-        while i < #collection do
+        while i <= #collection do
             if collection[i] and collection[i].payload then
                 local value = collection[i].payload
                 i = i + 1
@@ -94,8 +94,24 @@ function Block:iterator_children()
     return self:iterator_payload( self.children )
 end
 
-function Block:move(...)
-    self.transform:move(...)
+function Block:move(...) -- accepts a full, unpacked transform as a "root"
+    self.transform:move(...) -- move the block
+    self.transform = self.transform:offset( self.offset.x, self.offset.y )
+
+    local child_transform = self.transform:offset( self.m_w /2, self.m_h /2 )
+
+    for child in self:iterator_children() do
+        child:move( child_transform:unpack() )
+    end
+
+    for collection in self:iterator_collections() do
+        for _, child in ipairs(collection) do
+            child:move( child_transform:unpack() )
+        end
+    end
+
+
+
 end
 
 
