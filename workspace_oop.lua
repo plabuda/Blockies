@@ -22,9 +22,9 @@ end
 
 function Workspace:draw()
     for i = 1, #self.blocks do
-        self.platform.draw_block( self.blocks[i] )
+        self.blocks[i]:draw()
     end
-        self.platform.draw_block( self.cursor.collider )
+        self.cursor.collider:draw()
 end
 
 function Workspace:get_cursor()

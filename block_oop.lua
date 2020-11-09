@@ -1,4 +1,5 @@
 local Transform = require("transform")
+local Platform = require("platform")
 
 local Block = {}
 
@@ -12,6 +13,7 @@ function Block:new( w, h, ... )
        m_w = MARGIN_DEFAULT,
        m_h = MARGIN_DEFAULT,
        transform = Transform:new(...),
+       offset = {x = 0, y = 0},
 
        children = {},
        collections = {}
@@ -44,6 +46,46 @@ function Block:iterator_payload( collection )
     return iter
 end
 
+function Block:measure_callback()
+    -- nothing here, to be overriden
+end
+
+function Block:measure()
+
+    for child in self:iterator_children() do
+        child:measure()
+    end
+
+    for collection in self:iterator_collections() do
+        for _, child in ipairs(collection) do
+            child:measure()
+        end
+    end
+    
+    self:measure_callback()
+
+end
+
+function Block:draw_callback()
+    Platform.draw_block(self)
+end
+
+function Block:draw()
+
+    self:draw_callback()
+
+    for child in self:iterator_children() do
+        child:draw()
+    end
+
+    for collection in self:iterator_collections() do
+        for _, child in ipairs(collection) do
+            child:draw()
+        end
+    end
+
+end
+
 function Block:iterator_collections()
     return self:iterator_payload( self.collections )
 end
@@ -51,7 +93,6 @@ end
 function Block:iterator_children()
     return self:iterator_payload( self.children )
 end
-
 
 function Block:move(...)
     self.transform:move(...)

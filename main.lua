@@ -7,29 +7,29 @@ b:set_color(0.6,0.5,0.3)
 w:add_block(Block:new(32,32,256,96))
 w:add_block(b)
 
--- unit test for children / payload iterator
-b.children = {
-    { payload = nil},
-    { payload = 'a'},    
-    { payload = nil},    
-    { payload = 'b'},    
-    { payload = 'c'},    
-    { payload = nil},    
-    { payload = nil},
-    { payload = 'd'},
-    { payload = nil}
-}
+-- -- unit test for children / payload iterator
+-- b.children = {
+--     { payload = nil},
+--     { payload = 'a'},    
+--     { payload = nil},    
+--     { payload = 'b'},    
+--     { payload = 'c'},    
+--     { payload = nil},    
+--     { payload = nil},
+--     { payload = 'd'},
+--     { payload = nil}
+-- }
 
--- unit test for collections
-b.collections = {
-    { payload = nil},
-    { payload = { 'a', 'b', 'c', 'e' }},
-    { payload = nil},
-    { payload = {'zz','hhh','kkkk'}},
-    { payload = nil},
-    { payload = nil},
-    { payload = nil}
-}
+-- -- unit test for collections
+-- b.collections = {
+--     { payload = nil},
+--     { payload = { 'a', 'b', 'c', 'e' }},
+--     { payload = nil},
+--     { payload = {'zz','hhh','kkkk'}},
+--     { payload = nil},
+--     { payload = nil},
+--     { payload = nil}
+-- }
 
 local text = ''
 
