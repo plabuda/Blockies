@@ -27,7 +27,7 @@ function Block:set_color(r, g, b)
     self.b = b
 end
 
-function Block:iterator( collection )
+function Block:iterator_payload( collection )
     local i = 1
     local iter = function ()
         while i < #collection do
@@ -44,8 +44,12 @@ function Block:iterator( collection )
     return iter
 end
 
+function Block:iterator_collections()
+    return self:iterator_payload( self.collections )
+end
+
 function Block:iterator_children()
-    return self.iterator( self.children )
+    return self:iterator_payload( self.children )
 end
 
 
