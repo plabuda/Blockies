@@ -19,15 +19,17 @@ function Block:new( w, h, ... )
        collections = {}
     }
 
-    setmetatable(result, {__index = self } )
+    setmetatable(result, {__index = Block } )
     return result
 end
 
-function Block:set_color(r, g, b)
+function Block:set_color(r, g, b) -- should a color be block's inherent feature?
     self.r = r
     self.g = g
     self.b = b
 end
+
+-- region Iterators
 
 function Block:iterator_payload( collection )
     local i = 1
@@ -45,6 +47,16 @@ function Block:iterator_payload( collection )
     end
     return iter
 end
+
+function Block:iterator_collections()
+    return self:iterator_payload( self.collections )
+end
+
+function Block:iterator_children()
+    return self:iterator_payload( self.children )
+end
+
+-- endregion
 
 function Block:measure_callback()
     -- nothing here, to be overriden
@@ -86,13 +98,12 @@ function Block:draw()
 
 end
 
-function Block:iterator_collections()
-    return self:iterator_payload( self.collections )
+function Block:collide( other )
+    return self.transform:collide(self.w, self.h, self.m_w, self.m_h, 
+                                  other.transform, other.w, other.h, other.m_w, other.m_h)
 end
 
-function Block:iterator_children()
-    return self:iterator_payload( self.children )
-end
+
 
 function Block:move(...) -- accepts a full, unpacked transform as a "root"
     self.transform:move(...) -- move the block

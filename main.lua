@@ -31,4 +31,9 @@ end
 
 function love.mousemoved( x, y, dx, dy, istouch )
     c:move(x - 8, y - 8)
+    if c.collider:collide(g) then
+        c.collider:set_color(0.6,0.2,0.2)
+    else
+        c.collider:set_color(1,1,1)
+    end
 end
