@@ -8,9 +8,10 @@ function Workspace:new( platform )
     local result = -- actual init
     {
         blocks = {},
-        cursor = Cursor:new(),
         platform = platform or require("platform") -- require platform stuff here
     }
+
+    result.cursor = Cursor:new(result),
 
     setmetatable(result, {__index = self } )
     return result
@@ -24,7 +25,7 @@ function Workspace:draw()
     for i = 1, #self.blocks do
         self.blocks[i]:draw()
     end
-        self.cursor.collider:draw()
+        self.cursor:draw()
 end
 
 function Workspace:get_cursor()

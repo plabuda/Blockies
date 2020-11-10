@@ -103,6 +103,40 @@ function Block:collide( other )
                                   other.transform, other.w, other.h, other.m_w, other.m_h)
 end
 
+function Block:pick( other )
+    if self.is_slot ~= true and self:collide( other ) then
+        
+        --look for a nested collision in children
+        for _, child in ipairs(self.children) do
+            if child.payload then
+                local candidate = child.payload:pick( other ) 
+                if candidate then -- child had a collision
+                    if candidate == child.payload then -- a direct descendant - pop it from payload
+                        child.payload = nil
+                    end
+                    return candidate
+                end                
+            end
+        end
+
+        for collection in self:iterator_collections() do
+            for i, child in ipairs(collection) do
+                local candidate = child:pick( other )
+                if candidate then
+                    if candidate == child then
+                        table.remove( collection, i )
+                    end
+                    return candidate
+                end
+            end
+        end
+        
+        return self -- no child block found, return self
+    else
+        return nil -- did not collide with this block
+    end
+end
+
 
 
 function Block:move(...) -- accepts a full, unpacked transform as a "root"

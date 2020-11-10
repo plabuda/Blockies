@@ -3,12 +3,12 @@ local Block = require("block_oop")
 local w = Workspace:new()
 local c = w:get_cursor()
 
-w:add_block(Block:new(32,32,256,96))
+w:add_block(Block:new(232,32,256,96))
 
-local r = Block:new(64,64,64,64)
+local r = Block:new(264,264,64,64)
 r:set_color(0.6,0.2,0.2)
 
-local g = Block:new(64,64,64,264)
+local g = Block:new(164,164,64,264)
 g:set_color(0.2,0.6,0.2)
 g.offset = {x = 32, y = 32}
 
@@ -36,4 +36,8 @@ function love.mousemoved( x, y, dx, dy, istouch )
     else
         c.collider:set_color(1,1,1)
     end
+end
+
+function love.mousepressed()
+    c:pick()
 end
