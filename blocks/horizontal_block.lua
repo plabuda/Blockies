@@ -22,7 +22,7 @@ end
 function Horizontal_Block:measure_callback()
     local offset_x = self.m_w / 2
     local offset_y = self.m_h / 2
-    local min_height = 0
+    local min_height = 32
 
     for _, child in ipairs(self.expressions) do
         child:set_offset(offset_x, offset_y)
@@ -31,7 +31,7 @@ function Horizontal_Block:measure_callback()
         min_height = math.max(min_height, h)
     end
 
-    self.w = offset_x + self.m_w /2
+    self.w = math.max(offset_x + self.m_w /2, 32 + self.m_w)
     self.h = min_height + self.m_h
 end
 

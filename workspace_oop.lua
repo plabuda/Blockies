@@ -28,6 +28,18 @@ function Workspace:draw()
         self.cursor:draw()
 end
 
+function Workspace:add_slots( type )
+    for i = 1, #self.blocks do
+        self.blocks[i]:add_slots( type )
+    end
+end
+
+function Workspace:clear_slots( type )
+    for i = 1, #self.blocks do
+        self.blocks[i]:clear_slots( type )
+    end
+end
+
 function Workspace:get_cursor()
     return self.cursor
 end

@@ -1,5 +1,6 @@
 local Transform = require("transform")
 local Platform = require("platform")
+local Slot = nil
 
 local Block = {}
 
@@ -69,6 +70,45 @@ function Block:measure_callback()
     -- nothing here, to be overriden
 end
 
+function Block:add_slots( type, skip_measure )
+    if Slot == nil then
+        Slot = require("slot")
+    end
+    
+    if not skip_measure then
+        self:measure()
+    end
+end
+
+function Block:clear_slots( type, skip_measure )
+    for _, child_slot in ipairs(self.children) do
+        if child_slot.payload then
+            if child_slot.payload.is_slot == true then
+                child_slot.payload = nil
+            else
+                child_slot.payload:clear_slots( type, true )
+            end
+        end
+    end
+
+    for collection in self:iterator_collections() do
+        local k = 1
+        while k <= #collection do
+            if collection[k].is_slot then
+                table.remove( collection , k)                        
+            else
+                collection[k]:clear_slots( type, true )
+                k = k + 1
+            end
+        end
+    end
+
+    if not skip_measure then
+        self:measure()
+    end
+  
+end
+
 function Block:measure()
 
     self:measure_raw()
@@ -119,7 +159,7 @@ function Block:collide( other )
                                   other.transform, other.w, other.h, other.m_w, other.m_h)
 end
 
-function Block:pick( other )
+function Block:pick( other, skip_measure )
     if self.is_slot ~= true and self:collide( other ) then
         
         --look for a nested collision in children
@@ -150,6 +190,35 @@ function Block:pick( other )
         return self -- no child block found, return self
     else
         return nil -- did not collide with this block
+    end
+end
+
+function Block:find_slot( other )
+    if self:collide(other) then
+        if self.is_slot == true then
+            return self
+        else
+            local candidate = nil
+
+            for child in self:iterator_children() do
+                candidate = child:find_slot( other )
+                if candidate ~= nil then
+                    return candidate
+                end
+            end
+        
+            for collection in self:iterator_collections() do
+                for _, child in ipairs(collection) do
+                    candidate = child:find_slot( other )
+                    if candidate ~= nil then
+                        return candidate
+                    end
+                end
+            end
+
+        end
+    else
+        return nil
     end
 end
 
