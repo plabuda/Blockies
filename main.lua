@@ -4,7 +4,16 @@ local HBlock = require("blocks/horizontal_block")
 local w = Workspace:new()
 local c = w:get_cursor()
 
-w:add_block(HBlock:new(0,0))
+local hb = HBlock:new(0,0)
+
+
+table.insert( hb.expressions, Block:new(16,64,10,10) )
+table.insert( hb.expressions, Block:new(32,64,10,10) )
+table.insert( hb.expressions, Block:new(48,64,10,10) )
+table.insert( hb.expressions, Block:new(64,64,10,10) )
+
+hb:measure()
+w:add_block(hb)
 
 local r = Block:new(264,264,64,64)
 r:set_color(0.6,0.2,0.2)

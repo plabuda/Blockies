@@ -76,6 +76,10 @@ function Block:measure()
 
 end
 
+function Block:get_size()
+    return self.w + self.m_w, self.h + self.m_h
+end
+
 function Block:measure_raw() -- measure without moving
     for child in self:iterator_children() do
         child:measure_raw()
