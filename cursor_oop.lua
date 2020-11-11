@@ -49,7 +49,8 @@ function Cursor:pick()
 
     if self.held_block then
         self.held_block.transform:align_with( self.collider.transform )
-        self.held_block.offset = self.collider.transform:offset_to(self.held_block.transform) -- transform needs to be able to calculate offset between two
+        local offset = self.collider.transform:offset_to(self.held_block.transform) -- transform needs to be able to calculate offset between two
+        self.held_block:set_offset(offset.x, offset.y)
         self.held_block:move(self.collider.transform:unpack())
     end
 end
@@ -63,7 +64,7 @@ function Cursor:drop()
             -- calculate block's transform in "absolute" space, with offsets 0,0
             local transform = self.collider.transform:offset(self.held_block.offset.x, self.held_block.offset.y)
             -- clear offsets and move to the calculated position
-            self.held_block.offset = {x = 0, y = 0}
+            self.held_block:set_offset(0,0)
             self.held_block:move(transform:unpack())
 
             -- stop holding object

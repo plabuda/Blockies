@@ -153,6 +153,11 @@ function Block:pick( other )
     end
 end
 
+function Block:set_offset(x, y)
+    self.offset.x = x
+    self.offset.y = y
+end 
+
 
 
 function Block:move(...) -- accepts a full, unpacked transform as a "root"
