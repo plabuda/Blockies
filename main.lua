@@ -1,9 +1,10 @@
 local Workspace = require("workspace_oop")
 local Block = require("block_oop")
+local HBlock = require("blocks/horizontal_block")
 local w = Workspace:new()
 local c = w:get_cursor()
 
-w:add_block(Block:new(232,32,256,96))
+w:add_block(HBlock:new(0,0))
 
 local r = Block:new(264,264,64,64)
 r:set_color(0.6,0.2,0.2)
@@ -14,7 +15,7 @@ g.offset = {x = 32, y = 32}
 
 local b = Block:new(64,64,64,164)
 b:set_color(0.2,0.2,0.6)
-b.offset = {x = -32, y = 32}
+b.offset = {x = 32, y = 32}
 
 r.children = { { payload = g } }
 g.children = { { payload = b } }

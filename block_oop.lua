@@ -5,22 +5,29 @@ local Block = {}
 
 local MARGIN_DEFAULT = 10
 
-function Block:new( w, h, ... )
-    local result = -- actual init
-    {
-       w = w,
-       h = h,
-       m_w = MARGIN_DEFAULT,
-       m_h = MARGIN_DEFAULT,
-       transform = Transform:new(...),
-       offset = {x = 0, y = 0},
+function Block:new( w, h, ... ) -- user-facing constructor
+    local result = {}
+    Block:init(result, w, h, ...)
+    return Block:new_raw(result)
+end
 
-       children = {},
-       collections = {}
-    }
+function Block:init( object, w, h, ... ) -- actual initialization, declares necessary fields
+    object.w = w
+    object.h = h
+    object.m_w = MARGIN_DEFAULT
+    object.m_h = MARGIN_DEFAULT
+    object.transform = Transform:new(...)
+    object.offset = {x = 0, y = 0}
 
-    setmetatable(result, {__index = Block } )
-    return result
+    object.children = {}
+    object.collections = {}
+end
+
+function Block:new_raw(o) -- constructor for inheritance purposes
+    o = o or {}   -- create object if user does not provide one
+    setmetatable(o, self)
+    self.__index = self
+    return o
 end
 
 function Block:set_color(r, g, b) -- should a color be block's inherent feature?
