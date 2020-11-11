@@ -49,5 +49,12 @@ function Cursor:pick()
     end
 end
 
+function Cursor:drop()
+    if self.collided_slot then
+    else
+        table.insert( self.workspace.blocks, self.held_block )
+        self.held_block = nil
+    end
+end
 
 return Cursor

@@ -41,3 +41,7 @@ end
 function love.mousepressed()
     c:pick()
 end
+
+function love.mousereleased()
+    c:drop()
+end
