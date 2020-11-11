@@ -37,7 +37,11 @@ function Cursor:pick()
         self.held_block = candidate:pick(self.collider)
         if self.held_block then
             if self.held_block == candidate then
+                -- if picked object from workspace, pluck it from the workspace list
                 table.remove( self.workspace.blocks, i )
+            else
+                -- if picked a child object, trigger parent to measure itself
+                candidate:measure() 
             end
             break
         end
@@ -51,10 +55,20 @@ function Cursor:pick()
 end
 
 function Cursor:drop()
-    if self.collided_slot then
-    else
-        self.workspace:add_block(self.held_block)
-        self.held_block = nil
+    if self.held_block then
+        if self.collided_slot then
+        else
+            self.workspace:add_block(self.held_block)
+            
+            -- calculate block's transform in "absolute" space, with offsets 0,0
+            local transform = self.collider.transform:offset(self.held_block.offset.x, self.held_block.offset.y)
+            -- clear offsets and move to the calculated position
+            self.held_block.offset = {x = 0, y = 0}
+            self.held_block:move(transform:unpack())
+
+            -- stop holding object
+            self.held_block = nil
+        end
     end
 end
 

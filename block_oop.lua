@@ -71,18 +71,23 @@ end
 
 function Block:measure()
 
+    self:measure_raw()
+    self:move(self.transform:unpack())
+
+end
+
+function Block:measure_raw() -- measure without moving
     for child in self:iterator_children() do
-        child:measure()
+        child:measure_raw()
     end
 
     for collection in self:iterator_collections() do
         for _, child in ipairs(collection) do
-            child:measure()
+            child:measure_raw()
         end
     end
     
     self:measure_callback()
-
 end
 
 function Block:draw_callback()
