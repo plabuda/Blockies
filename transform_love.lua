@@ -56,4 +56,13 @@ function Transform:collide(w, h, m_w, m_h, other, o_w, o_h, o_m_w, o_m_h)
 
 end
 
+function Transform:offset_to( other )
+    return {x = other.x - self.x, 
+            y = other.y - self.y}
+end
+
+function Transform:align_with( other )
+    -- in 3D cases this would snap to plane, rotate, etc
+end
+
 return Transform
