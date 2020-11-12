@@ -70,37 +70,50 @@ function Block:measure_callback()
     -- nothing here, to be overriden
 end
 
-function Block:add_slots( type, skip_measure )
+function Block:add_slots( type, parent )
     if Slot == nil then
         Slot = require("slot")
     end
 
     for _, child_slot in ipairs(self.children) do
         if child_slot.payload then
-            child_slot.payload:add_slots(type, true)            
+            child_slot.payload:add_slots(type, parent or self)            
         else
-            child_slot.payload = Slot:new( function (other) child_slot.payload = other end )
+            child_slot.payload = Slot:new(parent or self, function (other) child_slot.payload = other end )
         end
     end
 
     for _, collection in ipairs(self.collections) do
+        local min_value = nil
         if collection.payload then
             for _, child in ipairs(collection.payload) do
                 if not child.is_slot then
-                    child:add_slots(type, true)
+                    child:add_slots(type, parent or self)
+                    local w, h = child:get_size()
+                    if collection.is_vertical == true then
+                        min_value = math.max(min_value or 0, w)
+                    else
+                        min_value = math.max(min_value or 0, h)
+                    end
                 end
             end
 
+            min_value = min_value or 32
+
             -- visual type of collection should dictate type of slot here
             for k = 0, #collection.payload do
-                table.insert( collection.payload, 2 * k + 1, Slot:new( function (other) table.insert( collection.payload, k * 2 + 1, other ) end ))
+                local callback = function (other) table.insert( collection.payload, k * 2 + 1, other ) end
+                if collection.is_vertical == true then
+                    table.insert( collection.payload, 2 * k + 1, Slot:vertical(parent or self, min_value, callback ))
+                else                    
+                    table.insert( collection.payload, 2 * k + 1, Slot:horizontal(parent or self, min_value, callback ))
+                end
             end
         end
     end
     
-    if not skip_measure then
-        self:measure()
-    end
+    self:measure() 
+
 end
 
 function Block:clear_slots( type, skip_measure )

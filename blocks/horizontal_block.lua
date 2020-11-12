@@ -24,7 +24,7 @@ function Horizontal_Block:measure_callback()
     local w, h = Platform:get_text_size( self.text )
 
     local offset_x = self.m_w + w
-    local offset_y = self.m_h / 2
+    local offset_y = 0
     
     local min_height = h + self.m_h /2
 
@@ -36,7 +36,7 @@ function Horizontal_Block:measure_callback()
     end
 
     self.w = math.max(offset_x + self.m_w /2, 32 + self.m_w)
-    self.h = min_height + self.m_h /2
+    self.h = min_height
 end
 
 return Horizontal_Block

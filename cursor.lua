@@ -7,7 +7,7 @@ function Cursor:new( workspace )
         
     local result = -- actual init
     {
-       collider = Block:new(8,8,0,0),
+       collider = Block:new(24,24,0,0),
        workspace = workspace,
        held_block = nil
     }
@@ -22,26 +22,27 @@ function Cursor:move( ... )
         self.held_block:move(...)
     end
 
-    if not (self.collided_slot and self.collided_slot:collide(self.collider)) then
+    local collider = self.collider
+    if not (self.collided_slot and self.collided_slot:collide(collider)) then
         -- not colliding with previous slot, or no previous slot at all
 
-        if self.collided_slot then
+        if self.collided_slot then            
             -- todo actual notify acquired here
             self.collided_slot:set_color(0.5,0.5,0.5)
+            self.collided_slot:clear_target()
             self.collided_slot = nil
         end
 
         for _, block in ipairs(self.workspace.blocks) do
-            self.collided_slot = block:find_slot(self.collider)
-            if self.collided_slot then
+            self.collided_slot = block:find_slot(collider)
+            if self.collided_slot and self.held_block then
                 -- todo actual notify released here
                 self.collided_slot:set_color(0.7,0.7,0.7)
+                self.collided_slot:set_target(self.held_block)
                 return
             end
         end
-    end
-    
-
+    end    
 end
 
 function Cursor:draw()
@@ -69,6 +70,7 @@ function Cursor:pick()
     end
 
     if self.held_block then
+        self.collided_slot = nil
         self.held_block.transform:align_with( self.collider.transform )
         local offset = self.collider.transform:offset_to(self.held_block.transform) -- transform needs to be able to calculate offset between two
         self.held_block:set_offset(offset.x, offset.y)
