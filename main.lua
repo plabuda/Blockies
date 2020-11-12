@@ -5,17 +5,11 @@ local HBlock = require("blocks/horizontal_block")
 local w = Workspace:new()
 local c = w:get_cursor()
 
-Block:add_slots()
-
 local hb = HBlock:new(0,0)
 
-table.insert( hb.expressions, Slot:new(10,10) )
 table.insert( hb.expressions, Block:new(16,64,10,10) )
-table.insert( hb.expressions, Slot:new(10,10) )
 table.insert( hb.expressions, Block:new(48,64,10,10) )
-table.insert( hb.expressions, Slot:new(10,10) )
 table.insert( hb.expressions, Block:new(64,64,10,10) )
-table.insert( hb.expressions, Slot:new(10,10) )
 
 hb:measure()
 w:add_block(hb)

@@ -81,7 +81,8 @@ function Cursor:drop()
     if self.held_block then
         local type = self.held_block.type
         if self.collided_slot and self.collided_slot.drop_callback then
-            self.collided_slot:drop_callback(self.held_block)
+            self.collided_slot.drop_callback(self.held_block)
+            self.held_block:set_offset(0,0)
             self.workspace:clear_slots( self.held_block.type )
             self.held_block = nil
         else

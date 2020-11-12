@@ -74,6 +74,29 @@ function Block:add_slots( type, skip_measure )
     if Slot == nil then
         Slot = require("slot")
     end
+
+    for _, child_slot in ipairs(self.children) do
+        if child_slot.payload then
+            child_slot.payload:add_slots(type, true)            
+        else
+            child_slot.payload = Slot:new( function (other) child_slot.payload = other end )
+        end
+    end
+
+    for _, collection in ipairs(self.collections) do
+        if collection.payload then
+            for _, child in ipairs(collection.payload) do
+                if not child.is_slot then
+                    child:add_slots(type, true)
+                end
+            end
+
+            -- visual type of collection should dictate type of slot here
+            for k = 0, #collection.payload do
+                table.insert( collection.payload, 2 * k + 1, Slot:new( function (other) table.insert( collection.payload, k * 2 + 1, other ) end ))
+            end
+        end
+    end
     
     if not skip_measure then
         self:measure()
