@@ -1,4 +1,4 @@
-local Block = require("../block_oop")
+local Block = require("../block")
 local Platform = require("../platform")
 
 local Horizontal_Block = Block:new_raw() -- Horizontal Block prototype inherits methods from Block prototype

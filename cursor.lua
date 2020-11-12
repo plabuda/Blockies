@@ -1,4 +1,4 @@
-local Block = require("block_oop")
+local Block = require("block")
 
 local Cursor = {}
 
