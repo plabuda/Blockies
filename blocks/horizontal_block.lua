@@ -3,8 +3,8 @@ local Platform = require("../platform")
 
 local Horizontal_Block = Block:new_raw() -- Horizontal Block prototype inherits methods from Block prototype
 
-function Horizontal_Block:new( ... ) -- user-facing constructor
-    local result = { expressions = {} }
+function Horizontal_Block:new( text, ... ) -- user-facing constructor
+    local result = { expressions = {}, text = text }
     Horizontal_Block:init(result, 100, 100, ... ) -- call base initializer
     result = Horizontal_Block:new_raw(result)  -- attach methods to __index
 
@@ -16,13 +16,17 @@ end
 
 function Horizontal_Block:draw_callback()
     Platform.draw_block(self)
-    Platform.print(self.transform.x)
+    Platform.draw_text( self.transform:offset(self.m_h, self.m_w), self.text )
 end
 
 function Horizontal_Block:measure_callback()
-    local offset_x = self.m_w / 2
+    
+    local w, h = Platform:get_text_size( self.text )
+
+    local offset_x = self.m_w + w
     local offset_y = self.m_h / 2
-    local min_height = 32
+    
+    local min_height = h + self.m_h /2
 
     for _, child in ipairs(self.expressions) do
         child:set_offset(offset_x, offset_y)
@@ -32,7 +36,7 @@ function Horizontal_Block:measure_callback()
     end
 
     self.w = math.max(offset_x + self.m_w /2, 32 + self.m_w)
-    self.h = min_height + self.m_h
+    self.h = min_height + self.m_h /2
 end
 
 return Horizontal_Block

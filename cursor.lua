@@ -7,7 +7,7 @@ function Cursor:new( workspace )
         
     local result = -- actual init
     {
-       collider = Block:new(16,16,0,0),
+       collider = Block:new(8,8,0,0),
        workspace = workspace,
        held_block = nil
     }
