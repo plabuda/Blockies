@@ -1,4 +1,4 @@
-local Platform = {}
+local Platform = { font = love.graphics.newFont("FiraMono-Medium.ttf", 16)}
 
 function Platform.print( object )
     love.graphics.print( tostring(object), 0, 0)
@@ -10,21 +10,26 @@ function Platform.draw_block( block )
     local g = block.g or 1
     local b = block.b or 1
 
-    local x = block.transform.x
-    local y = block.transform.y
+    local transform = block.transform
+    local w = block.w
+    local h = block.h
 
-    love.graphics.setColor(r * 0.7, g * 0.7, b * 0.7)
-    love.graphics.rectangle('line', x, y, block.w + block.m_w, block.h + block.m_h) -- outline
-    
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.rectangle('fill', x + block.m_w/2 , y + block.m_h / 2, block.w, block.h)
-    
-    love.graphics.setColor(0, 0, 0)
-    love.graphics.rectangle('fill', x + block.m_w/2 + 1 , y + block.m_h / 2 + 1, block.w - 2, block.h - 2)
+    Platform.draw_box( transform, w + block.m_w, h + block.m_h, 0.7 * r, 0.7 * g, 0.7 * b, 'line' )
 
-    love.graphics.setColor(r, g, b)
-    love.graphics.rectangle('fill', x + block.m_w/2 + 2 , y + block.m_h / 2 + 2, block.w - 4, block.h - 4)
+    transform = transform:offset(block.m_w /2, block.m_h/2)
+    Platform.draw_box( transform, w, h, 1,1,1)
 
+    transform = transform:offset(1,1)
+    Platform.draw_box( transform, w - 2, h - 2, 0,0,0)
+
+    transform = transform:offset(1,1)
+    Platform.draw_box( transform, w - 4, h - 4, r,g,b)
+end
+
+function Platform.draw_box( transform, w, h, r, g, b, fill )
+    fill = fill or 'fill'
+    love.graphics.setColor(r, g , b)
+    love.graphics.rectangle(fill, transform.x, transform.y, w, h)
 end
 
 return Platform
