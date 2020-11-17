@@ -17,7 +17,7 @@
 --
 --------------------------------------------------------------------------------
 
-local gg    = require 'metalua.grammar.generator'
+local gg    = require 'lua.grammar.generator'
 
 return function(M)
     local _M = gg.future(M)

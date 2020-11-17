@@ -33,10 +33,10 @@
 --
 -------------------------------------------------------------------------------
 
-local lexer    = require 'metalua.grammar.lexer'
-local gg       = require 'metalua.grammar.generator'
+local lexer    = require 'lua.grammar.lexer'
+local gg       = require 'lua.grammar.generator'
 
-local annot = require 'metalua.compiler.parser.annot.generator'
+local annot = require 'lua.compiler.parser.annot.generator'
 
 --------------------------------------------------------------------------------
 -- List of all keywords that indicate the end of a statement block. Users are

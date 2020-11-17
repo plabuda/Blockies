@@ -38,7 +38,7 @@
 --
 --------------------------------------------------------------------------------
 
-require 'checks'
+function checks() end
 
 local M  = { }
 
@@ -146,14 +146,14 @@ end
 function CONV :function_to_bytecode(...) return string.dump(...) end
 
 function CONV :ast_to_src(...)
-	require 'metalua.loader' -- ast_to_string isn't written in plain lua
-	return require 'metalua.compiler.ast_to_src' (...)
+	require 'lua.loader' -- ast_to_string isn't written in plain lua
+	return require 'lua.compiler.ast_to_src' (...)
 end
 
 local MT = { __index=CONV, __type='metalua.compiler' }
 
 function M.new()
-	local parser = require 'metalua.compiler.parser' .new()
+	local parser = require 'lua.compiler.parser' .new()
 	local self = { parser = parser }
 	setmetatable(self, MT)
 	return self

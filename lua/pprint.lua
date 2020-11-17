@@ -32,7 +32,7 @@ M.DEFAULT_CFG = {
     metalua_tag    = true;  -- Use Metalua's backtick syntax sugar?
     fix_indent     = nil;   -- If a number, number of indentation spaces;
                             -- If false, indent to the previous brace.
-    line_max       = nil;   -- If a number, tries to avoid making lines with
+    line_max       = 40;   -- If a number, tries to avoid making lines with
                             -- more than this number of chars.
     initial_indent = 0;     -- If a number, starts at this level of indentation
     keywords       = { };   -- Set of keywords which must not use Lua's field

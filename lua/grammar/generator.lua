@@ -46,7 +46,7 @@
 
 local M = { }
 
-local lexer = require 'metalua.grammar.lexer'
+local lexer = require 'lua.grammar.lexer'
 
 --------------------------------------------------------------------------------
 -- Symbol generator: [gensym()] returns a guaranteed-to-be-unique identifier.

@@ -21,7 +21,7 @@
 -- Generate a new lua-specific lexer, derived from the generic lexer.
 ----------------------------------------------------------------------
 
-local generic_lexer = require 'metalua.grammar.lexer'
+local generic_lexer = require 'lua.grammar.lexer'
 
 return function()
     local lexer = generic_lexer.lexer :clone()

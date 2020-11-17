@@ -20,7 +20,7 @@
 -- Compile-time metaprogramming features: splicing ASTs generated during compilation,
 -- AST quasi-quoting helpers.
 
-local gg       = require 'metalua.grammar.generator'
+local gg       = require 'lua.grammar.generator'
 
 return function(M)
     local _M = gg.future(M)
@@ -36,7 +36,7 @@ return function(M)
     -- TODO: that's not part of the parser
     function M.meta.eval (ast)
         -- TODO: should there be one mlc per splice, or per parser instance?
-        local mlc = require 'metalua.compiler'.new()
+        local mlc = require 'lua.compiler'.new()
         local f = mlc :ast_to_function (ast, '=splice')
         local result=f(M) -- splices act on the current parser
         return result
@@ -95,7 +95,7 @@ return function(M)
             parser_name = a[1]
         end
         -- TODO FIXME running a new parser with the old lexer?!
-        local parser = require 'metalua.compiler.parser'.new()
+        local parser = require 'lua.compiler.parser'.new()
         local ast = parser [parser_name](lx)
         if in_a_quote then -- only prevent quotation in this subtree
             --printf("SPLICE_IN_QUOTE:\n%s", _G.table.tostring(ast, "nohash", 60))

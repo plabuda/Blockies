@@ -1,0 +1,1 @@
+local a, b, c, d = 1, {test = 17}, nil, 'parade'

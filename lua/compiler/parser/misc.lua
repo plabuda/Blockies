@@ -36,7 +36,7 @@
 --
 --------------------------------------------------------------------------------
 
-local gg       = require 'metalua.grammar.generator'
+local gg       = require 'lua.grammar.generator'
 
 -- TODO: replace splice-aware versions with naive ones, move etensions in ./meta
 

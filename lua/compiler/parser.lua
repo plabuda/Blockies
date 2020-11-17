@@ -26,10 +26,10 @@ local MODULE_REL_NAMES = { "annot.grammar", "expr", "meta", "misc",
 
 local function new()
     local M = {
-        lexer = require "metalua.compiler.parser.lexer" ();
+        lexer = require "lua.compiler.parser.lexer" ();
         extensions = { } }
     for _, rel_name in ipairs(MODULE_REL_NAMES) do
-        local abs_name = "metalua.compiler.parser."..rel_name
+        local abs_name = "lua.compiler.parser."..rel_name
         local extender = require (abs_name)
         if not M.extensions[abs_name] then
             if type (extender) == 'function' then extender(M) end

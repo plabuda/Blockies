@@ -26,9 +26,9 @@
 --
 -------------------------------------------------------------------------------
 
-local pp    = require 'metalua.pprint'
-local gg    = require 'metalua.grammar.generator'
-local annot = require 'metalua.compiler.parser.annot.generator'
+local pp    = require 'lua.pprint'
+local gg    = require 'lua.grammar.generator'
+local annot = require 'lua.compiler.parser.annot.generator'
 
 return function(M)
     local _M = gg.future(M)

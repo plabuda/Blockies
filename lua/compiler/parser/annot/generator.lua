@@ -17,8 +17,8 @@
 --
 --------------------------------------------------------------------------------
 
-require 'checks'
-local gg = require 'metalua.grammar.generator'
+function checks() end
+local gg = require 'lua.grammar.generator'
 local M  = { }
 
 function M.opt(mlc, primary, a_type)
