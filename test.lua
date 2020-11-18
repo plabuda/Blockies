@@ -1,1 +1,9 @@
-local a, b, c, d = 1, {test = 17}, nil, 'parade'
+return {
+    [[a]],
+    [[10]],
+    [[10.6]],
+    [['a']],
+    [[nil]],
+    [[true]],
+    [[false]]    
+}

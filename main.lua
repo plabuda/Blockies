@@ -6,14 +6,33 @@ local VBlock = require("blocks/vertical_block")
 local Transform = require("transform")
 local Platform = require("platform")
 
-local compiler = require("lua.compiler").new()
+local Parser = require("lua.blockie_parser")
 
 local w = Workspace:new()
 local c = w:get_cursor()
 local t = Transform:new(0,0)
 
+local test_src = [[a, b = c, d
+local z]] -- b = 10 c,d = 12, 13 local e = 14, 26]]
+
+--[[local k,i,j = {}, 2, 3
+function k:test(a, b, c, ...)
+    return a
+end
+
+local z = k.aaa[10].test(0,0,0,0,0,0,0)]]
+
 local print = require("lua.pprint")
-local src = print.tostring(compiler:srcfile_to_ast("test.lua"))
+
+local src = Parser:parse(test_src) 
+
+for i, v in ipairs(src) do
+    w:add_block(v)
+end
+-- ''--print.tostring(ast)
+-- for i, v in pairs(ast) do
+--     src = src .. tostring(i) .. ' = ' .. tostring(v) .. '\n'
+-- end
 
 
 -- local hb = HBlock:new("Hello \n world", 0,0)
@@ -47,8 +66,8 @@ local src = print.tostring(compiler:srcfile_to_ast("test.lua"))
 
 function love.draw()
 
-    -- w:draw()
-    Platform.draw_text(t, src, 1,0,0)
+    w:draw()
+    --Platform.draw_text(t, src, 1,0,0)
 
 end
 
