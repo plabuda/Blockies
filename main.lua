@@ -1,23 +1,56 @@
+local Transform = require("transform")
+local Platform = require("platform")
+
 if lovr then
+    local t = Transform:new(lovr.math.newMat4())
+function lovr.load()
+    models = {
+        left = lovr.headset.newModel('hand/left'),
+        right = lovr.headset.newModel('hand/right')
+    }
+
+
+    end
+
+function lovr.update()
+    local hands = lovr.headset.getHands()
+    local down = lovr.headset.isDown(hands[2], 'grip')
+
+    if down then
+        local m4 = mat4(lovr.headset.getPose(hands[2])):mul(mat4(0,0,0.3, math.pi, 0, 1, 0))
+        t:move(m4)
+    end
+end
+
+
 function lovr.draw()
-
-    local str = ''
-    for i = 1, 5 do
-        local hand = lovr.headset.getHands()[i]
-        if hand then            
-            local x, y, z = lovr.headset.getPosition(hand)            
-            lovr.graphics.sphere(x, y, z, .1)
-
-            str = str .. tostring(x) .. ' ' .. tostring(y) .. ' ' .. tostring(z) .. '\n'
-
-        else
-            str = str .. 'nil\n'
+    for hand, model in pairs(models) do
+        if lovr.headset.isTracked(hand) then
+            local handPose = mat4(lovr.headset.getPose(hand))
+            local turnPose = mat4(0,0,0.15, math.pi, 0, 1, 0) -- looks good enough
+            model:draw(handPose:mul(turnPose))
         end
     end
 
-    
-lovr.graphics.print(str .. #(lovr.headset.getHands()), 0, 1.7, -3, .5)
+    local text = "This is a test ->\n->\n->"
+    local w, h = Platform:get_text_size( text )
+
+    Platform.draw_box( t, w * 0.1, h * 0.1, 0.3,0.3,0.8)
+    local tt = Transform:new(lovr.math.mat4(t:unpack()):translate(0,0,0.03))
+    Platform.draw_text(tt, text , 0.6,0.6,0)
+
+    local x, y, z = t:unpack():unpack(false)
+    lovr.graphics.sphere(x, y, z, .01 ) 
 end
+
+-- function lovr.draw()
+--     for _, hand in ipairs({ 'left', 'right' }) do
+--       for _, joint in ipairs(lovr.headset.getSkeleton(hand) or {}) do
+--         lovr.graphics.points(unpack(joint, 1, 3))
+--       end
+--     end
+--   end
+
 
 else
 
@@ -26,8 +59,6 @@ local Slot = require("slot")
 local Block = require("block")
 local HBlock = require("blocks/horizontal_block")
 local VBlock = require("blocks/vertical_block")
-local Transform = require("transform")
-local Platform = require("platform")
 
 local Parser = require("lua.blockie_parser")
 
