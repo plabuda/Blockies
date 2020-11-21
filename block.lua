@@ -22,6 +22,7 @@ function Block:init( object, w, h, ... ) -- actual initialization, declares nece
 
     object.children = {}
     object.collections = {}
+    object.texts = {}
 end
 
 function Block:new_raw(o) -- constructor for inheritance purposes
@@ -188,6 +189,11 @@ function Block:draw()
         end
     end
 
+    for _, text in ipairs(self.texts) do
+        local text_transform = self.transform:offset( text.x + self.m_w /2, text.y + self.m_h /2 )
+        Platform.draw_text( text_transform, text.text, text.r, text.g, text.b) 
+    end
+
 end
 
 function Block:collide( other )
@@ -280,9 +286,6 @@ function Block:move(...) -- accepts a full, unpacked transform as a "root"
             child:move( child_transform:unpack() )
         end
     end
-
-
-
 end
 
 

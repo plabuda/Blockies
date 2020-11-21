@@ -1,3 +1,26 @@
+if lovr then
+function lovr.draw()
+
+    local str = ''
+    for i = 1, 5 do
+        local hand = lovr.headset.getHands()[i]
+        if hand then            
+            local x, y, z = lovr.headset.getPosition(hand)            
+            lovr.graphics.sphere(x, y, z, .1)
+
+            str = str .. tostring(x) .. ' ' .. tostring(y) .. ' ' .. tostring(z) .. '\n'
+
+        else
+            str = str .. 'nil\n'
+        end
+    end
+
+    
+lovr.graphics.print(str .. #(lovr.headset.getHands()), 0, 1.7, -3, .5)
+end
+
+else
+
 local Workspace = require("workspace")
 local Slot = require("slot")
 local Block = require("block")
@@ -81,4 +104,6 @@ end
 
 function love.mousereleased()
     c:drop()
+end
+
 end
