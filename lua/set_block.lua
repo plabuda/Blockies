@@ -23,11 +23,42 @@ end
 
 function Set_Block:measure_callback()
 
+    local num = math.max(#self.lhs - 1, 0) + math.max(#self.rhs - 1, 0) + 1
 
-    local objects = {self.texts[1]}
-    for _, v in ipairs(self.collections[1].payload) do table.insert( objects, v ) end
-    table.insert( objects, self.texts[2])
-    for _, v in ipairs(self.collections[2].payload) do table.insert( objects, v ) end
+    --todo filter out slots and don't put commas there
+    while #self.texts ~= num do
+        if #self.texts > num then
+            table.remove( self.texts)
+        else
+            table.insert( self.texts, {text = '', x = 0, y = 0} )
+        end
+    end
+
+    local objects = {}
+    local counter = 1
+    if #self.lhs > 0 then
+        for i = 1, #self.lhs - 1 do
+            table.insert( objects, self.lhs[i])
+            table.insert( objects, self.texts[counter])
+            self.texts[counter].text = ','
+            counter = counter + 1
+        end
+        table.insert( objects, self.lhs[#self.lhs] )
+    end
+
+    table.insert( objects, self.texts[counter])
+    self.texts[counter].text = '='
+    counter = counter + 1
+
+    if #self.rhs > 0 then
+        for i = 1, #self.rhs - 1 do
+            table.insert( objects, self.rhs[i])
+            table.insert( objects, self.texts[counter])
+            self.texts[counter].text = ','
+            counter = counter + 1
+        end
+        table.insert( objects, self.rhs[#self.rhs] )
+    end
 
     local w, h = Layout_Utils.horizontal_center( 2,2, objects, 32 )
 

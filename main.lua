@@ -5,8 +5,8 @@ if lovr then
     local t = Transform:new(lovr.math.newMat4())
 function lovr.load()
     models = {
-        left = lovr.headset.newModel('hand/left'),
-        right = lovr.headset.newModel('hand/right')
+        left = lovr.headset.newModel('hand/left', { animated = true }),
+        right = lovr.headset.newModel('hand/right', { animated = true })
     }
 
 
@@ -27,8 +27,10 @@ function lovr.draw()
     for hand, model in pairs(models) do
         if lovr.headset.isTracked(hand) then
             local handPose = mat4(lovr.headset.getPose(hand))
+            local success = lovr.headset.animate(hand, model)
+            lovr.graphics.print(tostring(success), 0, 1.7, -3, .5)
             local turnPose = mat4(0,0,0.15, math.pi, 0, 1, 0) -- looks good enough
-            model:draw(handPose:mul(turnPose))
+            model:draw(handPose)--handPose:mul(turnPose))
         end
     end
 
@@ -67,7 +69,19 @@ local c = w:get_cursor()
 local t = Transform:new(0,0)
 
 local test_src = [[a, b = c, d
-local z]] -- b = 10 c,d = 12, 13 local e = 14, 26]]
+local z, x, spectrum
+
+local a = 
+{
+    a < b,
+    a <= b,
+    a == b,
+    a ~= b,
+    a >= b,
+    a > b,
+    -4.15
+}
+]] -- b = 10 c,d = 12, 13 local e = 14, 26]]
 
 --[[local k,i,j = {}, 2, 3
 function k:test(a, b, c, ...)

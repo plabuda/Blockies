@@ -18,8 +18,8 @@ function Slot:new( parent, drop_callback ) -- user-facing constructor
     return result
 end
 
--- function Slot:draw_callback()
--- end
+function Slot:draw_callback()
+end
 
 function Slot:vertical(parent, width, drop_callback)
     local result = Slot:new( parent, drop_callback)
