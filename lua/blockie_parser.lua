@@ -1,5 +1,6 @@
 local Block = require("block")
 
+local String_Block = require("lua.string_block")
 local Local_Block = require("lua.local_block")
 local Return_Block = require("lua.return_block")
 local Set_Block = require("lua.set_block")
@@ -12,6 +13,10 @@ local Parser = {
 
 function Parser:parse_Default( token )
     return Block:new(64,64,64,64)
+end
+
+function Parser:parse_String( token )
+    return String_Block:new(token[1], 64,64)
 end
 
 function Parser:build_set(token, is_local)
