@@ -24,7 +24,9 @@ end
 function Set_Block:measure_callback()
 
     local num = math.max(#self.lhs - 1, 0) + math.max(#self.rhs - 1, 0) + 1
-
+    if self.is_local then
+        num = num + 1
+    end
     --todo filter out slots and don't put commas there
     while #self.texts ~= num do
         if #self.texts > num then
@@ -36,6 +38,13 @@ function Set_Block:measure_callback()
 
     local objects = {}
     local counter = 1
+
+    if self.is_local then
+        self.texts[counter].text = 'local'
+        table.insert( objects, self.texts[counter] )
+        counter = counter + 1
+    end
+
     if #self.lhs > 0 then
         for i = 1, #self.lhs - 1 do
             table.insert( objects, self.lhs[i])
@@ -60,10 +69,10 @@ function Set_Block:measure_callback()
         table.insert( objects, self.rhs[#self.rhs] )
     end
 
-    local w, h = Layout_Utils.horizontal_center( 2,2, objects, 32 )
+    local w, h = Layout_Utils.horizontal_center( 3,3, objects, 32 )
 
-    self.w = w + 4
-    self.h = h + 4
+    self.w = w + 6
+    self.h = h + 6
 end
 
 return Set_Block

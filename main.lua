@@ -68,19 +68,7 @@ local w = Workspace:new()
 local c = w:get_cursor()
 local t = Transform:new(0,0)
 
-local test_src = [[a, b = c, d
-local z, x, spectrum
-
-local a = 
-{
-    a < b,
-    a <= b,
-    a == b,
-    a ~= b,
-    a >= b,
-    a > b,
-    -4.15
-}
+local test_src = [[return x, a, b, c
 ]] -- b = 10 c,d = 12, 13 local e = 14, 26]]
 
 --[[local k,i,j = {}, 2, 3
