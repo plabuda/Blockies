@@ -14,7 +14,7 @@ function Local_Block:new( items, ...)
     -- class-specific init can be done here, as long as there isn't multiple inheritance
     result:set_color(0.4,0.6,0.3)
     result.collections = {
-        {payload = result.items }
+        {payload = result.items}
     }
     result:measure()
     return result

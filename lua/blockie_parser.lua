@@ -1,5 +1,7 @@
 local Block = require("block")
 
+local Operator_Block = require("lua.operator_block")
+local Number_Block = require("lua.number_block")
 local String_Block = require("lua.string_block")
 local Local_Block = require("lua.local_block")
 local Return_Block = require("lua.return_block")
@@ -11,12 +13,35 @@ local Parser = {
     print = require("lua.pprint")
 }
 
+-- this will be a big one 
+function Parser:parse_Op( token )
+
+    local opname = token[1]
+    --print( 'XXXX ' .. tostring(opname) .. ' XXX ') 
+
+    -- unary minus - if the param is number, return a negative number instead
+    if opname == 'unm' then
+        if token[2].tag == 'Number' then
+            return self:parse_Number( token[2], true )
+        else
+            -- return an actual unary op here
+            return Operator_Block:new( opname, 64,64)
+        end
+    else
+        return Operator_Block:new( opname, 64,64)
+    end
+end
+
 function Parser:parse_Default( token )
     return Block:new(64,64,64,64)
 end
 
 function Parser:parse_String( token )
     return String_Block:new(token[1], 64,64)
+end
+
+function Parser:parse_Number( token, is_negative )
+    return Number_Block:new(token[1], is_negative, 64,64)
 end
 
 function Parser:build_set(token, is_local)
