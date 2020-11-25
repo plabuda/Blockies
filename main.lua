@@ -69,7 +69,11 @@ local c = w:get_cursor()
 local t = Transform:new(0,0)
 
 local test_src = [[
-    x = a ~= b
+    do        
+    x = (not a == (b >= c) or (b <= c))
+    y = x
+    z = y
+    end
     -- x = {
     --     a or b or c,
     --     a and b,

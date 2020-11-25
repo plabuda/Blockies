@@ -20,6 +20,18 @@ function Parser:is_unary( opname )
         or opname == 'unm'
 end
 
+function Parser:parse_Paren( token )
+    local expr = {}
+    if token[1].tag == 'Op' then
+        self:parse_Op(token[1], expr)
+    else
+        table.insert( expr, self:parse_token(token[1]) )
+    end
+
+    return Expression_Block:new(expr, true, 64, 64)
+
+end
+
 function Parser:parse_Op( token, expr )
 
     local opname = token[1]
