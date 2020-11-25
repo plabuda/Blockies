@@ -68,7 +68,29 @@ local w = Workspace:new()
 local c = w:get_cursor()
 local t = Transform:new(0,0)
 
-local test_src = [[local x = not - 4]] -- b = 10 c,d = 12, 13 local e = 14, 26]]
+local test_src = [[
+    x = a ~= b
+    -- x = {
+    --     a or b or c,
+    --     a and b,
+    --     a < b,
+    --     a > b,
+    --     a <= b,
+    --     a >= b,
+    --     a ~= b,
+    --     a == b,
+    --     a .. b,
+    --     a + b,
+    --     a - b,
+    --     a * b,
+    --     a / b,
+    --     a % b,
+    --     not a,
+    --     #a,
+    --     -a,
+    --     a^b
+    -- }
+]] -- b = 10 c,d = 12, 13 local e = 14, 26]]
 
 
 --[[local k,i,j = {}, 2, 3

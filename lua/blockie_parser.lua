@@ -1,5 +1,6 @@
 local Block = require("block")
 
+local Expression_Block = require("lua.expression_block")
 local Operator_Block = require("lua.operator_block")
 local Number_Block = require("lua.number_block")
 local String_Block = require("lua.string_block")
@@ -13,22 +14,62 @@ local Parser = {
     print = require("lua.pprint")
 }
 
--- this will be a big one 
-function Parser:parse_Op( token )
+function Parser:is_unary( opname )
+    return opname == 'not'
+        or opname == 'len'
+        or opname == 'unm'
+end
+
+function Parser:parse_Op( token, expr )
 
     local opname = token[1]
-    --print( 'XXXX ' .. tostring(opname) .. ' XXX ') 
 
-    -- unary minus - if the param is number, return a negative number instead
-    if opname == 'unm' then
-        if token[2].tag == 'Number' then
-            return self:parse_Number( token[2], true )
+    -- special case of unary minus negating a number
+    if opname == 'unm' and token[2].tag == 'Number' then
+        local number = self:parse_Number( token[2], true )
+        if expr then
+            table.insert( expr, number )
         else
-            -- return an actual unary op here
-            return Operator_Block:new( opname, 64,64)
+            return number
         end
-    else
-        return Operator_Block:new( opname, 64,64)
+    end
+
+    -- if we're passed a table, we insert to it
+    -- but if not, we'll return as Expression, and pass it as table to children
+    local is_root = false
+    if not expr then
+        expr = {}
+        is_root = true
+    end
+
+
+    if self:is_unary(opname) then
+        table.insert( expr, Operator_Block:new(opname, 64, 64) )
+        -- unary operators have only one side
+        if token[2].tag == 'Op' then
+            self:parse_Op(token[2], expr)
+        else
+            table.insert( expr, self:parse_token(token[2]) )
+        end
+    else        
+        -- expand left-hand operand, or just add it
+        if token[2].tag == 'Op' then
+            self:parse_Op(token[2], expr)
+        else
+            table.insert( expr, self:parse_token(token[2]) )
+        end
+        -- add itself
+        table.insert( expr, Operator_Block:new(opname, 64, 64) )
+        -- do the same for right-hand
+        if token[3].tag == 'Op' then
+            self:parse_Op(token[3], expr)
+        else
+            table.insert( expr, self:parse_token(token[3]) )
+        end
+    end
+
+    if is_root then
+        return Expression_Block:new(expr, false, 64,64)
     end
 end
 
