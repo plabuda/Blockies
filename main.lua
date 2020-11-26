@@ -1,45 +1,84 @@
 local Transform = require("transform")
 local Platform = require("platform")
+local Block = require("block")
+local Expression_Block = require("lua.expression_block")
+local String_Block = require("lua.string_block")
+local Number_Block = require("lua.number_block")
+local Workspace = require("workspace")
+local Slot = require("slot")
+local HBlock = require("blocks/horizontal_block")
+local VBlock = require("blocks/vertical_block")
+
+local Parser = require("lua.blockie_parser")
+
+local w = Workspace:new()
+
 
 if lovr then
     local t = Transform:new(lovr.math.newMat4())
+
+--   local b = String_Block:new("Test")
+--    b:measure()
+--    w:add_block(b)
+
+  local test_src = [[local x = 'hello'
+]] -- b = 10 c,d = 12, 13 local e = 14, 26]]
+
+local src = Parser:parse(test_src) 
+local b = {}
+for i, v in ipairs(src) do
+    b = v
+    w:add_block(v)
+end
+
 function lovr.load()
     models = {
         left = lovr.headset.newModel('hand/left', { animated = true }),
         right = lovr.headset.newModel('hand/right', { animated = true })
     }
 
-
-    end
+end
 
 function lovr.update()
     local hands = lovr.headset.getHands()
-    local down = lovr.headset.isDown(hands[2], 'grip')
+    local down = lovr.headset.isDown(hands[2], 'trigger')
 
     if down then
         local m4 = mat4(lovr.headset.getPose(hands[2])):mul(mat4(0,0,0.3, math.pi, 0, 1, 0))
+        b:move(m4)
+        b:measure()
         t:move(m4)
     end
 end
 
 
 function lovr.draw()
+    lovr.graphics.setColor(1,1,1)
     for hand, model in pairs(models) do
         if lovr.headset.isTracked(hand) then
             local handPose = mat4(lovr.headset.getPose(hand))
             local success = lovr.headset.animate(hand, model)
             lovr.graphics.print(tostring(success), 0, 1.7, -3, .5)
             local turnPose = mat4(0,0,0.15, math.pi, 0, 1, 0) -- looks good enough
-            model:draw(handPose)--handPose:mul(turnPose))
+            model:draw(handPose:mul(turnPose))
         end
     end
+    
+    w:draw()
 
-    local text = "This is a test ->\n->\n->"
-    local w, h = Platform:get_text_size( text )
+    if false then
+        local text = "This is a test ->\n->\n->"
+        local w, h = Platform:get_text_size( text )
 
-    Platform.draw_box( t, w * 0.1, h * 0.1, 0.3,0.3,0.8)
-    local tt = Transform:new(lovr.math.mat4(t:unpack()):translate(0,0,0.03))
-    Platform.draw_text(tt, text , 0.6,0.6,0)
+        Platform.draw_box( t, w, h, 0.3, 0.3, 0.3)
+        local t_right = t:offset(w,0)
+        Platform.draw_box( t_right, w, h, 1,0.3,0.3)
+        local t_down = t:offset(0,h)    
+        Platform.draw_box( t_down, w, h, 0.3,0.1,0.3)
+
+        local tt = Transform:new(lovr.math.mat4(t:unpack()):translate(0,0,0.03))
+        Platform.draw_text(tt, text , 0.6,0.6,0)
+    end
 
     local x, y, z = t:unpack():unpack(false)
     lovr.graphics.sphere(x, y, z, .01 ) 
@@ -56,47 +95,18 @@ end
 
 else
 
-local Workspace = require("workspace")
-local Slot = require("slot")
-local Block = require("block")
-local HBlock = require("blocks/horizontal_block")
-local VBlock = require("blocks/vertical_block")
 
-local Parser = require("lua.blockie_parser")
-
-local w = Workspace:new()
 local c = w:get_cursor()
 local t = Transform:new(0,0)
 
-local test_src = [[
-    do        
-    x = (not a == (b >= c) or (b <= c))
-    y = x
-    z = y
-    end
-    -- x = {
-    --     a or b or c,
-    --     a and b,
-    --     a < b,
-    --     a > b,
-    --     a <= b,
-    --     a >= b,
-    --     a ~= b,
-    --     a == b,
-    --     a .. b,
-    --     a + b,
-    --     a - b,
-    --     a * b,
-    --     a / b,
-    --     a % b,
-    --     not a,
-    --     #a,
-    --     -a,
-    --     a^b
-    -- }
-]] -- b = 10 c,d = 12, 13 local e = 14, 26]]
+local test_src =  [[local x = 'hello'
+]]-- b = 10 c,d = 12, 13 local e = 14, 26]]
 
+local src = Parser:parse(test_src) 
 
+for i, v in ipairs(src) do
+    w:add_block(v)
+end
 --[[local k,i,j = {}, 2, 3
 function k:test(a, b, c, ...)
     return a

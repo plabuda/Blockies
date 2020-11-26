@@ -11,13 +11,13 @@ function Platform.draw_block( block )
     local w = block.w
     local h = block.h
 
-    --Platform.draw_box( transform, w + block.m_w, h + block.m_h, 0.7 * r, 0.7 * g, 0.7 * b, 'line' )
+    Platform.draw_box( transform, w + block.m_w, h + block.m_h, 0.7 * r, 0.7 * g, 0.7 * b, 'line' )
 
     transform = transform:offset(block.m_w /2, block.m_h/2)
-    Platform.draw_box( transform, w, h)
+   -- Platform.draw_box( transform, w, h)
 
     transform = transform:offset(1,1)
-    Platform.draw_box( transform, w - 2, h - 2, 0,0,0)
+  --  Platform.draw_box( transform, w - 2, h - 2, 0,0,0)
 
     transform = transform:offset(1,1)
     Platform.draw_box( transform, w - 4, h - 4, r,g,b)

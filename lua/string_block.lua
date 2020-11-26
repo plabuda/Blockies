@@ -24,7 +24,7 @@ function String_Block:new( text, ...)
     parsed = string.gsub(parsed, '\"', '\\"')
     parsed = string.gsub(parsed, '\'', '\\\'')
 
-    result:set_color(0.8,0.3,0.8)
+    result:set_color(0.4,0.1,0.4)
     result.texts = { {text = '"' .. parsed .. '"', x = 2, y = 2 }}
     return result
 end

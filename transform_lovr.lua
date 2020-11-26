@@ -1,11 +1,12 @@
-local Transform = {}
+local Transform = { scale = 1000}
 
 function Transform:new( ... )
     
     local arg = {...}
     
     local result = -- actual init
-    { m4 = arg[1] }
+    { m4 = lovr.math.newMat4()  }
+    if arg[1] then result.m4:set(arg[1]) end
 
     setmetatable(result, {__index = self } )
     return result
@@ -16,13 +17,19 @@ function Transform:move(m4) -- this signature is specific to the backend
 end
 
 function Transform:offset( x, y )
+
+    local z = 1
+    local scale = self.scale
+    local m = lovr.math.mat4(self.m4)
+    m:translate(x / scale, -y / scale, z / scale)
     -- this signature is always x, y
     -- x grows to the "right", in the direction of width
     -- y grows "down", in the direction of height 
     
-    --return Transform:new(x + self.x, y + self.y)
 
-    error (' not implemented ')
+    -- TODO transform:unpack:translate for greater efficiency?
+
+    return Transform:new(m)
 end
 
 function Transform:unpack() -- deconstruct to values that could be passed to new
