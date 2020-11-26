@@ -6,8 +6,8 @@ function Transform:new( ... )
 
     local result = -- actual init
     {
-       x = arg[1],
-       y = arg[2]
+       x = arg[1] or 0,
+       y = arg[2] or 0
     }
 
     setmetatable(result, {__index = self } )
