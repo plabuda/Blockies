@@ -1,4 +1,4 @@
-local Transform = { scale = 1000}
+local Transform = { scale = 500}
 
 function Transform:new( ... )
     
@@ -38,7 +38,27 @@ end
 
 function Transform:collide(w, h, m_w, m_h, other, o_w, o_h, o_m_w, o_m_h)
 
-    error (' not implemented ')
+
+    local wc = o_w + o_m_w
+    local wb = w + m_w
+
+    local hc = o_h + o_m_h
+    local hb = h + m_h 
+
+    local m_inv = lovr.math.mat4(self.m4)
+    m_inv:invert()
+    local result = m_inv:mul(other.m4)
+    x, y, z = result:unpack(false)
+    x = x * 500
+    y = y * 500
+    z = z * 500
+
+    local r = (x >= 15 - wc and x <= wb - 15)
+    local g = (y <= (hc - 15) and y >= -(hb - 15))
+    local bl =(z >= -5 and z <= 5)
+
+    return r and g and bl
+    --error (' not implemented ')
     -- this is arguably not pretty, but it has to be transform's responsibility to define collisions
 
     -- local b1 = {

@@ -1,4 +1,4 @@
-local Platform = { font = lovr.graphics.newFont("FiraMono-Medium.ttf", 16), scale = 1000 }
+local Platform = { font = lovr.graphics.newFont("FiraMono-Medium.ttf", 16), scale = 500 }
 lovr.graphics.setFont(Platform.font)
 
 function Platform.draw_block( block )
@@ -53,7 +53,7 @@ function Platform.draw_text( transform, text, r, g, b)
     g = g or 0
     b = b or 0
 
-    local scale = 100 -- Platform.scale
+    local scale = Platform.scale / 10
     lovr.graphics.setColor(r, g , b)
     local m = lovr.math.mat4(transform.m4)
     m:translate(0,0,0.003)
