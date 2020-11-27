@@ -22,7 +22,11 @@ local test_src = [[local x, y, z = 'hello', 'lovr', 'people!'
 local src = Parser:parse(test_src) 
 
 
-local m4 = lovr.math.mat4(lovr.math.vec3(-0.4, 1.5, -1.2))
+
+
+
+if lovr then
+    local m4 = lovr.math.mat4(lovr.math.vec3(-0.4, 1.5, -1.2))
 for i, v in ipairs(src) do
     v:move(m4)
     w:add_block(v)
@@ -31,9 +35,6 @@ end
 
 local x, y, z = 0, 0, 0
 local was_pressed = false
-
-
-if lovr then
     local t = Transform:new(lovr.math.newMat4())
 
 --   local b = String_Block:new("Test")
@@ -110,6 +111,11 @@ function lovr.draw()
 end
 
 else
+
+for i, v in ipairs(src) do
+    w:add_block(v)
+end
+
 
 function love.draw()
     w:draw()
