@@ -18,18 +18,15 @@ end
 
 function Transform:offset( x, y )
 
-    local z = 1
-    local scale = self.scale
-    local m = lovr.math.mat4(self.m4)
-    m:translate(x / scale, -y / scale, z / scale)
-    -- this signature is always x, y
-    -- x grows to the "right", in the direction of width
-    -- y grows "down", in the direction of height 
-    
-
-    -- TODO transform:unpack:translate for greater efficiency?
-
-    return Transform:new(m)
+    if x ~= 0 and y ~= 0 then
+        local z = 1
+        local scale = self.scale
+        local m = lovr.math.mat4(self.m4)
+        m:translate(x / scale, -y / scale, z / scale)
+        return Transform:new(m)
+    else
+        return Transform:new(self.m4)
+    end
 end
 
 function Transform:unpack() -- deconstruct to values that could be passed to new
@@ -49,13 +46,14 @@ function Transform:collide(w, h, m_w, m_h, other, o_w, o_h, o_m_w, o_m_h)
     m_inv:invert()
     local result = m_inv:mul(other.m4)
     x, y, z = result:unpack(false)
-    x = x * 500
-    y = y * 500
-    z = z * 500
+    x = x * self.scale
+    y = y * self.scale
+    z = z * self.scale
 
-    local r = (x >= 15 - wc and x <= wb - 15)
-    local g = (y <= (hc - 15) and y >= -(hb - 15))
-    local bl =(z >= -5 and z <= 5)
+
+    local r = (x >= 5 - wc and x <= wb - 5)
+    local g = (y <= (hc - 5) and y >= -(hb - 5))
+    local bl =(z >= -10 and z <= 10)
 
     return r and g and bl
     --error (' not implemented ')
@@ -85,13 +83,22 @@ function Transform:collide(w, h, m_w, m_h, other, o_w, o_h, o_m_w, o_m_h)
 end
 
 function Transform:offset_to( other )
-    error (' not implemented ')
+    local m_inv = lovr.math.mat4(self.m4)
+    m_inv:invert()
+    local result = m_inv:mul(other.m4)
+    x, y = result:unpack(false)
+    x = x * self.scale
+    y = y * self.scale
+    
+    return { x = x, y = -y} 
+    -- error (' not implemented ')
     -- return {x = other.x - self.x, 
     --         y = other.y - self.y}
 end
 
 function Transform:align_with( other )
-    error (' not implemented ') --self.angle, self.ax, self.ay, self.az = other.angle, other.ax, other.ay, other.az
+
+   -- error (' not implemented ') --self.angle, self.ax, self.ay, self.az = other.angle, other.ax, other.ay, other.az
     -- in 3D cases this would snap to plane, rotate, etc
 end
 

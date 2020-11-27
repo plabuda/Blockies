@@ -13,17 +13,24 @@ local Parser = require("lua.blockie_parser")
 
 local w = Workspace:new()
 local c = w:get_cursor()
-local b = Block:new(64,32)
-b:measure()
+local b = {}
 
-local test_src = [[local x = 'hello' ]]
+local test_src = [[local x, y, z = 'hello', 'lovr', 'people!'
+                    x = (y .. 'test')
+                    z = 10 * 15^2
+                    return z, y, x ]]
 local src = Parser:parse(test_src) 
 
+
+local m4 = lovr.math.mat4(lovr.math.vec3(-0.4, 1.5, -1.2))
 for i, v in ipairs(src) do
+    v:move(m4)
     w:add_block(v)
+    m4:translate(0.2,-0.2,0)
 end
 
 local x, y, z = 0, 0, 0
+local was_pressed = false
 
 
 if lovr then
@@ -41,10 +48,10 @@ function lovr.load()
         right = lovr.headset.newModel('hand/right', { animated = true })
     }
 
-    w:add_block(b)
+   -- w:add_block(b)
     
-    wc, hc = c.collider:get_size()
-    wb, hb = b:get_size()
+   -- wc, hc = c.collider:get_size()
+   -- wb, hb = b:get_size()
 
 end
 
@@ -52,36 +59,21 @@ function lovr.update()
     local hands = lovr.headset.getHands()
 
     if lovr.headset.isDown(hands[1], 'trigger') then
-        local m4 = mat4(lovr.headset.getPose(hands[1])):mul(mat4(0,0,0.2, math.pi, 0, 1, 0))
-        b:move(m4)
+        local m4 = mat4(lovr.headset.getPose(hands[1])):translate(0,0,-0.2)
+     --   b:move(m4)
     end
 
-    if lovr.headset.isDown(hands[2], 'trigger') then
-        local m4 = mat4(lovr.headset.getPose(hands[2])):mul(mat4(0,0,0.2, math.pi, 0, 1, 0))
+   -- if lovr.headset.isDown(hands[2], 'trigger') then
+        local m4 = mat4(lovr.headset.getPose(hands[2])):translate(0,0,-0.2)
         c:move(m4)
-    end
 
-    if b:collide(c.collider) then
-        b:set_color(0.8,0.8,0.8)
-    else
-        b:set_color(0.3,0.3,0.3)
-    end
-    -- local m_inv = lovr.math.mat4(b.transform:unpack())
-    -- m_inv:invert()
-    -- local result = m_inv:mul(c.collider.transform:unpack())
-    -- x, y, z = result:unpack(false)
-    -- x = x * 500
-    -- y = y * 500
-    -- z = z * 500
-
-    -- local r = (x >= 15 - wc and x <= wb - 15) and 1 or 0.5
-    -- local g = (y <= (hc - 15) and y >= -(hb - 15)) and 1 or 0.5
-    -- local bl =(z >= -5 and z <= 5) and 1 or 0.5
-
-    --b:set_color(r,g,bl)
-    
-
-    
+    if lovr.headset.isDown(hands[2], 'trigger') and not was_pressed then
+        was_pressed = true
+        c:pick()
+    elseif not lovr.headset.isDown(hands[2], 'trigger') and was_pressed then
+        was_pressed = false
+        c:drop()
+    end    
 end
 
 
@@ -91,8 +83,7 @@ function lovr.draw()
         if lovr.headset.isTracked(hand) then
             local handPose = mat4(lovr.headset.getPose(hand))
             local success = lovr.headset.animate(hand, model)
-            local turnPose = mat4(0,0,0.15, math.pi, 0, 1, 0) -- looks good enough
-            model:draw(handPose:mul(turnPose))
+            model:draw(handPose)
         end
     end
     
@@ -113,9 +104,9 @@ function lovr.draw()
     end
 
     local xx, yy, zz = t:unpack():unpack(false)
-    lovr.graphics.sphere(xx, yy, zz, .01 ) 
+  --  lovr.graphics.sphere(xx, yy, zz, .01 ) 
     
-    lovr.graphics.print('X: ' .. x .. '\nY: ' .. y .. '\nZ: ' .. z , 0, 1.7, -3, .5)
+   -- lovr.graphics.print('X: ' .. x .. '\nY: ' .. y .. '\nZ: ' .. z , 0, 1.7, -3, .5)
 end
 
 else
