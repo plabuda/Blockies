@@ -126,10 +126,26 @@ for i, v in ipairs(src) do
     w:add_block(v)
 end
 
+local k = 5
+
 function find_character( text, offset, first, last )
-    first = first or 1
-    last = last or text:len()
+    first = first or 0
+    last = last or text:len() + 1
     print('Finding offset ' .. tostring(offset) .. ' in range ' .. tostring(first) .. ' ' .. tostring(last))
+
+    if last <= first + 1 then
+        return last
+    else
+        local mid = math.floor( (first + last) / 2)
+        print('Mid is ' .. tostring(mid) )
+        local w = get_character_highlight( text, mid )
+        print('Width is ' .. tostring(w) )
+        if w < offset then
+            return find_character(text, offset, mid, last)
+        else
+            return find_character(text, offset, first, mid)
+        end
+    end
 end
 
 function get_character_highlight( text, character )
@@ -145,18 +161,22 @@ function get_line_highlight( text, first, last )
 end
 
 function love.draw()
-    local x, w, h = get_line_highlight(test, 5 , 15)
+    local x, w, h = get_line_highlight(test, k , k)
     love.graphics.setColor(0.4, 0.2 , 0)
     love.graphics.rectangle('fill', 32 + x, 32, w, h)
     draw_text(32, 32, test, 1, 1, 1);
     --w:draw()
 end
 
+local xxx = 0
+
 function love.mousemoved( x, y, dx, dy, istouch )
+    xxx = x
     c:move(x - 8, y - 8)
 end
 
 function love.mousepressed()
+    k = find_character(test, xxx - 32)
     c:pick()
 end
 
