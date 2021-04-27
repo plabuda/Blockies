@@ -15,13 +15,21 @@ local w = Workspace:new()
 local c = w:get_cursor()
 local b = {}
 
-local test_src = [[local x, y, z = 'hello', 'lovr', 'people!'
-                    x = (y .. 'test')
-                    z = 10 * 15^2
-                    return z, y, x ]]
+local test_src = [[local x, y, z = 'hello', 'lovr', 'people!' ; x = (y .. 'test') ; z = 10 * 15^2 ; return z, y, x ]]
+
+local test = "This is a test of a line, and looking for a character in this line"
+
 local src = Parser:parse(test_src) 
 
+function get_text_size( text )
+    local width, text = self.font:getWrap( text, math.huge)
+    return width, self.font:getHeight() * #text
+end
 
+function draw_text( x, y , text, r, g, b)    
+    love.graphics.setColor(r or 0, g or 0 , b or 0)
+    love.graphics.print( text, x, y)
+end
 
 
 
@@ -79,6 +87,8 @@ end
 
 
 function lovr.draw()
+
+
     lovr.graphics.setColor(1,1,1)
     for hand, model in pairs(models) do
         if lovr.headset.isTracked(hand) then
@@ -116,9 +126,30 @@ for i, v in ipairs(src) do
     w:add_block(v)
 end
 
+function find_character( text, offset, first, last )
+    first = first or 1
+    last = last or text:len()
+    print('Finding offset ' .. tostring(offset) .. ' in range ' .. tostring(first) .. ' ' .. tostring(last))
+end
+
+function get_character_highlight( text, character )
+    local sub = string.gsub(string.sub(text, 1, character), ' ', '_')
+    local width, height = Platform:get_text_size( sub  )
+    return width, height
+end
+
+function get_line_highlight( text, first, last )
+    local x, h = get_character_highlight(text, first - 1)
+    local width, height = get_character_highlight(text, last)
+    return x, width - x, height
+end
 
 function love.draw()
-    w:draw()
+    local x, w, h = get_line_highlight(test, 5 , 15)
+    love.graphics.setColor(0.4, 0.2 , 0)
+    love.graphics.rectangle('fill', 32 + x, 32, w, h)
+    draw_text(32, 32, test, 1, 1, 1);
+    --w:draw()
 end
 
 function love.mousemoved( x, y, dx, dy, istouch )
