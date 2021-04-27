@@ -145,22 +145,36 @@ end
 function Parser:parse( src ) --parse the given string using metalua parser 
     local ast = self:to_ast( src )
     local results = {}
-    for index, token in pairs(ast) do
-        if index ~= 'lineinfo' then
-            table.insert(results, self:parse_token(token))
-        end
-    end
+    self:print_info(ast, 0)
+    -- for index, token in pairs(ast) do
+    --     if index ~= 'lineinfo' then
+    --         --table.insert(results, self:parse_token(token))
+    --         self:print_info(token,0)
+    --     end
+    -- end
 
     return results
 end
 
-function Parser:parse_token( token )
-    local method = self['parse_'.. tostring(token.tag)]
-    if token.tag and method then
-        return method(self, token)
-    else
-        return self:parse_Default(token)
+function Parser:print_info( token, depth )
+    local off = string.rep("  ",depth)
+    local res = off .. tostring(token.lineinfo.first) .. tostring(token.lineinfo.last)
+    print(res)
+    for i, v in ipairs(token) do
+        if type(v) == 'table' then
+            self:print_info(v, depth + 1)
+        end
     end
+end
+
+function Parser:parse_token( token )
+    -- local method = self['parse_'.. tostring(token.tag)]
+    -- if token.tag and method then
+    --     return method(self, token)
+    -- else
+    --     return self:parse_Default(token)
+    -- end
+    return nil
 end
 
 function Parser:to_ast( src )
