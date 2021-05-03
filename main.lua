@@ -122,6 +122,8 @@ end
 
 else
 
+love.graphics.setBackgroundColor( 0xdc / 255, 0xd0 / 255, 0xb7 / 255)
+
 for i, v in ipairs(src) do
     w:add_block(v)
 end
@@ -162,9 +164,9 @@ end
 
 function love.draw()
     local x, w, h = get_line_highlight(test, k , k)
-    love.graphics.setColor(0.4, 0.2 , 0)
+    love.graphics.setColor( 0xc9 / 255, 0xb8 / 255, 0x92 / 255);
     love.graphics.rectangle('fill', 32 + x, 32, w, h)
-    draw_text(32, 32, test, 1, 1, 1);
+    draw_text(32, 32, test, 0x00 / 255, 0x6b / 255, 0x86 / 255);
     --w:draw()
 end
 
