@@ -144,8 +144,7 @@ end
 
 function Parser:parse( src ) --parse the given string using metalua parser 
     local ast = self:to_ast( src )
-    local results = {}
-    self:print_info(ast, 0)
+    local results = self:print_info(ast, 0)
     -- for index, token in pairs(ast) do
     --     if index ~= 'lineinfo' then
     --         --table.insert(results, self:parse_token(token))
@@ -157,14 +156,20 @@ function Parser:parse( src ) --parse the given string using metalua parser
 end
 
 function Parser:print_info( token, depth )
+    local result = {}
+
     local off = string.rep("  ",depth)
     local res = off .. tostring(token.lineinfo.first) .. tostring(token.lineinfo.last)
+    result.first = token.lineinfo.first.column
+    result.last = token.lineinfo.last.column
+    result.leaves = {}
     print(res)
     for i, v in ipairs(token) do
         if type(v) == 'table' then
-            self:print_info(v, depth + 1)
+            table.insert( result.leaves, self:print_info(v, depth + 1))
         end
     end
+    return result
 end
 
 function Parser:parse_token( token )

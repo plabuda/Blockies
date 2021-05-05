@@ -15,7 +15,8 @@ local w = Workspace:new()
 local c = w:get_cursor()
 local b = {}
 
-local test_src = [[local x, y, z = 'hello', 'lovr', 'people!' ; x = (y .. 'test') ; z = 10 * 15^2 ; return z, y, x ]]
+local test_src2 = [[local x, y, z = 'hello', 'lovr', 'people!' ; x = (y .. 'test') ; z = 10 * 15^2 ; return z, y, x ]]
+local test_src = [[function test(y, t, v) local x = y + y; print(t .. v); end]]
 
 local test = "This is a test of a line, and looking for a character in this line"
 
@@ -31,7 +32,44 @@ function draw_text( x, y , text, r, g, b)
     love.graphics.print( text, x, y)
 end
 
-
+function tree_select(tree, character)
+    if tree~= nil then
+        print('Testing character ' 
+        .. tostring(character) 
+        .. ' in range from ' .. tostring(tree.first) 
+        .. ' to ' .. tostring(tree.last)
+        .. ' with ' .. tostring(#tree.leaves) .. ' child nodes')
+        if #tree.leaves > 0 then
+            candidate = 1
+            while tree.leaves[candidate] ~= nil do
+                node = tree.leaves[candidate]
+                print('Trying node ' .. tostring(candidate)
+                 .. ' from ' .. tostring(node.first)
+                 .. ' to ' .. tostring(node.last))                 
+            
+                if node.first <= character then
+                    if node.last >= character then
+                        print('Selecting child node ' .. tostring(candidate))
+                        return tree_select(node, character)
+                    end
+                else
+                    break
+                end
+                candidate = candidate + 1
+            end
+             print('No matching child nodes, returning self ' 
+            .. tostring(tree.first) .. ' to ' .. tostring(tree.last))
+            return tree
+        else
+            print('No child nodes, returning self ' 
+            .. tostring(tree.first) .. ' to ' .. tostring(tree.last))
+            return tree
+        end
+    else
+        return nil
+    end
+    
+end
 
 if lovr then
     local m4 = lovr.math.mat4(lovr.math.vec3(-0.4, 1.5, -1.2))
@@ -129,8 +167,10 @@ for i, v in ipairs(src) do
 end
 
 local k = 5
+local k_first = 1
+local k_last = 1
 
-function find_character( text, offset, first, last )
+function find_character(text, offset, first, last )
     first = first or 0
     last = last or text:len() + 1
     print('Finding offset ' .. tostring(offset) .. ' in range ' .. tostring(first) .. ' ' .. tostring(last))
@@ -163,10 +203,10 @@ function get_line_highlight( text, first, last )
 end
 
 function love.draw()
-    local x, w, h = get_line_highlight(test, k , k)
+    local x, w, h = get_line_highlight(test_src, k_first , k_last)
     love.graphics.setColor( 0xc9 / 255, 0xb8 / 255, 0x92 / 255);
     love.graphics.rectangle('fill', 32 + x, 32, w, h)
-    draw_text(32, 32, test, 0x00 / 255, 0x6b / 255, 0x86 / 255);
+    draw_text(32, 32, test_src, 0x00 / 255, 0x6b / 255, 0x86 / 255);
     --w:draw()
 end
 
@@ -179,6 +219,11 @@ end
 
 function love.mousepressed()
     k = find_character(test, xxx - 32)
+    local node = tree_select(src, k)
+    if node ~= nil then
+        k_first = node.first
+        k_last = node.last
+    end
     c:pick()
 end
 
