@@ -205,19 +205,83 @@ end
 function love.draw()
     local x, w, h = get_line_highlight(test_src, k_first , k_last)
     love.graphics.setColor( 0xc9 / 255, 0xb8 / 255, 0x92 / 255);
+    
     love.graphics.rectangle('fill', 32 + x, 32, w, h)
     draw_text(32, 32, test_src, 0x00 / 255, 0x6b / 255, 0x86 / 255);
-    --w:draw()
+    love.graphics.print( tostring(dist), 0,0)
+    draw_cursor()
 end
 
 local xxx = 0
 
-function love.mousemoved( x, y, dx, dy, istouch )
-    xxx = x
-    c:move(x - 8, y - 8)
+function HSV(h, s, v)
+    if s <= 0 then return v,v,v end
+    h, s, v = h/256*6, s/255, v/255
+    local c = v*s
+    local x = (1-math.abs((h%2)-1))*c
+    local m,r,g,b = (v-c), 0,0,0
+    if h < 1     then r,g,b = c,x,0
+    elseif h < 2 then r,g,b = x,c,0
+    elseif h < 3 then r,g,b = 0,c,x
+    elseif h < 4 then r,g,b = 0,x,c
+    elseif h < 5 then r,g,b = x,0,c
+    else              r,g,b = c,0,x
+    end return (r+m)*255,(g+m)*255,(b+m)*255
 end
 
-function love.mousepressed()
+
+b_x = 0
+b_y = 0
+e_x = 0
+e_y = 0
+clicked = false
+dist = 0
+threshold = 40
+
+function draw_cursor()
+    local index = math.ceil( dist / threshold )
+    love.graphics.setLineWidth( 5 )
+    local dx = e_x - b_x
+    local dy = e_y - b_y
+
+    local r, g, b = HSV(index * 40 % 255, 128, 228)
+    love.graphics.setColor(r/255,g/255,b/255)
+    love.graphics.line(b_x, b_y, e_x, e_y)
+
+    local dist2 = (index - 1 ) * threshold
+    while dist2 > 0 do
+        index = index - 1
+        r, g, b = HSV(index * 40 % 255, 128, 228)
+        love.graphics.setColor(r/255,g/255,b/255)
+        love.graphics.line(b_x, b_y, 
+        b_x + (dx * dist2) / dist,
+        b_y + (dy * dist2 / dist))
+        dist2 = dist2 - threshold
+    end
+end
+
+function love.mousemoved( x, y, dx, dy, istouch )
+    if clicked then
+        e_x = x
+        e_y = y
+    end
+    dx = e_x - b_x
+    dy = e_y - b_y
+    dist = math.sqrt( dx * dx + dy * dy )
+    xxx = x
+    c:move(x - 8, y - 8)
+
+    local r, g, b = HSV(x % 255, 255, 255)
+    --love.graphics.setBackgroundColor(r/255,g/255,b/255)
+
+end
+
+function love.mousepressed(x, y )
+    clicked = true
+    b_x = x
+    b_y = y
+    e_x = x
+    e_y = y
     k = find_character(test, xxx - 32)
     local node = tree_select(src, k)
     if node ~= nil then
@@ -227,7 +291,12 @@ function love.mousepressed()
     c:pick()
 end
 
-function love.mousereleased()
+function love.mousereleased(x, y)
+    clicked = false
+    b_x = x
+    b_y = y
+    e_x = x
+    e_y = y
     c:drop()
 end
 
